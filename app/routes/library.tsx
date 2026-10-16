@@ -11,6 +11,8 @@ import {
   Check,
   Quote,
 } from 'lucide-react';
+import type { NewBookData, NewNoteData } from '~/components/common/AddModal';
+import AddModal from '~/components/common/AddModal';
 
 // ==========================================
 // TYPES & INTERFACES
@@ -159,6 +161,16 @@ const Library: React.FC = () => {
       note.reflection.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
+
+  const handleSaveBook = (data: NewBookData) => {
+    console.log("New book submitted:", data);
+    // Add logic to update your books state or backend here
+  };
+
+  const handleSaveNote = (data: NewNoteData) => {
+    console.log("New note submitted:", data);
+    // Add logic to update your notes state or backend here
+  };
 
   return (
     <div className='min-h-screen rounded-xl bg-[#F4F4F4] text-[#171A20] p-4 sm:p-8 space-y-8 max-w-6xl mx-auto font-sans'>
@@ -466,54 +478,13 @@ const Library: React.FC = () => {
 
       {/* ================= ADD NEW MODAL PLACEHOLDER ================= */}
       {isAddModalOpen && (
-        <div className='fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4'>
-          <div className='bg-white rounded-2xl max-w-md w-full p-6 space-y-6 shadow-2xl border border-[#EEEEEE]'>
-            <div className='flex justify-between items-center'>
-              <h3 className='text-lg font-bold text-[#171A20]'>
-                Add to Library
-              </h3>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className='p-1 bg-[#F4F4F4] rounded-full text-[#171A20]'
-              >
-                <X className='w-4 h-4' />
-              </button>
-            </div>
-            <p className='text-xs text-[#5C5E62]'>
-              Quickly add a new book or jot down a key takeaway note to your
-              knowledge vault.
-            </p>
-            <div className='space-y-3'>
-              <input
-                type='text'
-                placeholder='Title / Book Name'
-                className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
-              />
-              <input
-                type='text'
-                placeholder='Author / Source'
-                className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
-              />
-            </div>
-            <div className='flex justify-end gap-2 pt-2'>
-              <button
-                onClick={() => setIsAddModalOpen(false)}
-                className='px-4 py-2 bg-[#F4F4F4] text-[#171A20] rounded-lg text-sm font-medium'
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setIsAddModalOpen(false);
-                  alert('Item added successfully!');
-                }}
-                className='px-4 py-2 bg-[#171A20] text-white rounded-lg text-sm font-medium'
-              >
-                Save Item
-              </button>
-            </div>
-          </div>
-        </div>
+        <AddModal 
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSaveBook={handleSaveBook}
+        onSaveNote={handleSaveNote}
+        defaultTab="book" // or "note" depending on what you want open by default
+      />
       )}
     </div>
   );
