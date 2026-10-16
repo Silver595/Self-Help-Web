@@ -35,15 +35,10 @@ export default function Home() {
           </Link>
 
           <div className='flex items-center gap-3 sm:gap-6'>
-            <Link
-              to='/dashboard'
-              className='text-sm font-medium text-[#393C41] transition-colors hover:text-[#3E6AE1]'
-            >
-              Open App
-            </Link>
+           
 
             <Link
-              to='/dashboard'
+              to='/login'
               className='inline-flex min-h-10 items-center justify-center rounded-md bg-[#3E6AE1] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#3158C5] sm:px-4'
             >
               Get Started
