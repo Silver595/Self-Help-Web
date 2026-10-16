@@ -1,15 +1,50 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,
+  /* Typography - Inter as practical substitute for Universal Sans */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, Arial, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Tesla-inspired colors */
+  --color-primary: #3E6AE1;
+  --color-primary-hover: #5580F0;
+  --color-primary-active: #2D58CC;
+
+  --color-canvas: #FFFFFF;
+  --color-surface: #F4F4F4;
+  --color-surface-dark: #171A20;
+
+  --color-ink: #171A20;
+  --color-body: #393C41;
+  --color-muted: #5C5E62;
+  --color-on-primary: #FFFFFF;
+
+  --color-hairline: #EEEEEE;
+  --color-border: #D0D1D2;
+
+  /* Spacing scale (8px base) */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
 }
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  @apply bg-white text-[#171A20] antialiased;
+  font-family: var(--font-sans);
+  font-weight: 400;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+/* Optional dark support later */
+html.dark,
+body.dark {
+  @apply bg-[#171A20] text-white;
 }
