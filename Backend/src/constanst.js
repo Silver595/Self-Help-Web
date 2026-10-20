@@ -1,1 +1,1 @@
-export const DB_NAME = "self-help-app";
+// Stores constants used across the project, like the database name. 
