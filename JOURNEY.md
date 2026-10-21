@@ -36,3 +36,21 @@ Instead of nesting data randomly, I structured a normalized NoSQL architecture u
 - **Next Steps:** Initialize the Node.js/Express backend, configure environment variables, and write the Mongoose `User` and `Book` models.
 
 ---
+## [2026-10-21] - Backend Core Complete & Transition to Frontend/Testing
+
+### 🎯 Today's Focus
+- Finalized backend schemas, controllers, and routes for **Resources (Library)**, **Habits**, **Notes**, and **Journals**.
+- Refactored core logic to fix edge cases: implemented a strict consecutive streak calculation algorithm for habits, added compound unique indexes to prevent duplicate titles (`{ user: 1, title: 1 }`), and added `ObjectId` validation checks to prevent 500 server crashes on malformed requests.
+- Paused new feature development to pivot toward API testing, frontend integration, and defensive error handling.
+
+### 🛠️ Technical Decisions & Architecture
+- **Schema Referencing:** Maintained strict One-to-Many relationships tied to the authenticated `User` via `ObjectId`.
+- **Performance:** Ensured compound indexes (`{ user: 1, createdAt: -1 }`) are applied across all collections for fast sorting and retrieval.
+- **Security:** Maintained stateless JWT authentication (`verifyJWT`) guard across all module routes.
+
+### 🚀 Next Steps
+1. Test all CRUD endpoints using Postman / Thunder Client.
+2. Setup Axios client instances in the `client/` monorepo directory.
+3. Begin integrating frontend pages for Library and Habits.
+
+---
