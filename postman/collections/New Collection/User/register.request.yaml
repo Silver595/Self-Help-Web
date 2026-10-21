@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{server}}users/register"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"fullname\": \"Zaid Shaikh\",\r
+
+    \  \"email\": \"zai@examle.com\",\r
+
+    \  \"username\": \"zaid\",\r
+
+    \  \"password\": \"testPassword123\"\r
+
+    }"
+order: 1000
