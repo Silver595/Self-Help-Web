@@ -36,4 +36,21 @@ import userRouter from './routes/user.routes.js'
 app.use("/api/v1/users",userRouter)
 // Will pass to the users route https://localhost:8000/api/v1/users/login
 
+import resourceRouter from './routes/resource.routes.js';
+
+// Mount under your API version prefix
+app.use('/api/v1/resources', resourceRouter);
+
+import habitRouter from './routes/habit.routes.js';
+
+app.use('/api/v1/habits', habitRouter);
+
+import noteRouter from './routes/note.routes.js';
+
+app.use('/api/v1/notes', noteRouter);
+
+import journalRouter from './routes/journal.routes.js';
+
+app.use('/api/v1/journals', journalRouter);
+
 export { app };
