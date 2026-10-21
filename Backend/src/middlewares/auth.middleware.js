@@ -1,9 +1,9 @@
-import { ApiError } from '../utils/ApiError';
-import asyncHandler from '../utils/asyncHandler';
+import { ApiError } from '../utils/ApiError.js';
+import asyncHandler from '../utils/asyncHandler.js';
 import jwt, { decode } from 'jsonwebtoken';
-import User from '../models/user.model.js';
+import {User} from '../models/user.model.js';
 
-export const verifyJWT = asyncHandler(async (req, res, next) => {
+export const verifyJWT = asyncHandler(async (req, _, next) => {
   // We either get cookies from the web or on mobile phone we get the cookies from the mobile phone which looks something like this "Bearer: <Token>"
   try {
     const token =
@@ -26,6 +26,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 
     req.user = user;
     next();
+    
   } catch (error) {
     throw new ApiError(401, error?.message || 'Invalid Access Token');
   }
