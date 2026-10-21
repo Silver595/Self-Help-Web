@@ -1,4 +1,4 @@
-import { asyncHandler } from '../utils/asyncHandler.js';
+import  asyncHandler  from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Note } from '../models/note.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
@@ -42,6 +42,10 @@ const getNotes = asyncHandler(async (req, res) => {
 // 3. Update an existing note
 const updateNote = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // Bug Fix: Prevent 500 CastError crash on malformed IDs
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid Resource ID format');
+  }
   const { title, content } = req.body;
 
   const note = await Note.findOneAndUpdate(
@@ -67,6 +71,10 @@ const updateNote = asyncHandler(async (req, res) => {
 // 4. Delete a note
 const deleteNote = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // Bug Fix: Prevent 500 CastError crash on malformed IDs
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid Resource ID format');
+  }
 
   const note = await Note.findOneAndDelete({ _id: id, user: req.user._id });
 

@@ -1,4 +1,4 @@
-import { asyncHandler } from '../utils/asyncHandler.js';
+import asyncHandler from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Habit } from '../models/habit.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
@@ -24,7 +24,9 @@ const createHabit = asyncHandler(async (req, res) => {
 
 // 2. Get all habits for the logged-in user
 const getHabits = asyncHandler(async (req, res) => {
-  const habits = await Habit.find({ user: req.user._id }).sort({ createdAt: -1 });
+  const habits = await Habit.find({ user: req.user._id }).sort({
+    createdAt: -1,
+  });
 
   return res
     .status(200)
@@ -34,6 +36,11 @@ const getHabits = asyncHandler(async (req, res) => {
 // 3. Toggle a habit completion for a specific date
 const toggleHabit = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // Bug Fix: Prevent 500 CastError crash on malformed IDs
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid Resource ID format');
+  }
+
   const { date } = req.body; // Expected format: "YYYY-MM-DD"
 
   if (!date) {
@@ -57,6 +64,10 @@ const toggleHabit = asyncHandler(async (req, res) => {
 // 4. Delete a habit
 const deleteHabit = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // Bug Fix: Prevent 500 CastError crash on malformed IDs
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid Resource ID format');
+  }
 
   const habit = await Habit.findOneAndDelete({ _id: id, user: req.user._id });
 

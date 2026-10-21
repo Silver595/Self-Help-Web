@@ -1,4 +1,4 @@
-import { asyncHandler } from '../utils/asyncHandler.js';
+import  asyncHandler  from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Journal } from '../models/journal.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
@@ -55,6 +55,10 @@ const getJournals = asyncHandler(async (req, res) => {
 // 3. Update an existing journal entry
 const updateJournal = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // Bug Fix: Prevent 500 CastError crash on malformed IDs
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid Resource ID format');
+  }
   const { title, content, mood } = req.body;
 
   const journal = await Journal.findOneAndUpdate(
@@ -81,6 +85,10 @@ const updateJournal = asyncHandler(async (req, res) => {
 // 4. Delete a journal entry
 const deleteJournal = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // Bug Fix: Prevent 500 CastError crash on malformed IDs
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid Resource ID format');
+  }
 
   const journal = await Journal.findOneAndDelete({
     _id: id,

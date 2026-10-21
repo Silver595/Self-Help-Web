@@ -1,4 +1,4 @@
-import { asyncHandler } from '../utils/asyncHandler.js';
+import  asyncHandler  from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Resource } from '../models/resource.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
@@ -65,6 +65,10 @@ const getResources = asyncHandler(async (req, res) => {
 // 3. Update an existing resource
 const updateResource = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // Bug Fix: Prevent 500 CastError crash on malformed IDs
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid Resource ID format');
+  }
   const { title, type, link, author, status, rating } = req.body;
 
   // Ensure users can only update their own resources
@@ -95,6 +99,10 @@ const updateResource = asyncHandler(async (req, res) => {
 // 4. Delete a resource
 const deleteResource = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // Bug Fix: Prevent 500 CastError crash on malformed IDs
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new ApiError(400, 'Invalid Resource ID format');
+  }
 
   const resource = await Resource.findOneAndDelete({
     _id: id,
