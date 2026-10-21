@@ -1,9 +1,3 @@
-// Why a controller at all? Without it, you’d write all the logic inside the route definition, and your routes file would become thousands of lines of mixed-up code. A controller is just a function that:
-
-// Takes the request (req)
-// Does the work (validate input, check whether the user exists, hash the password, save to the DB)
-// Sends back a response (res)
-
 import asyncHandler from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { User } from '../models/user.model.js';
@@ -26,32 +20,18 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  // get user details from frontend
-  // add validations - not empty
-  // check if user already exists: Check using email or username
-  // create user object - create entry in db
-  // remove password & refresh token field from response
-  // check for user creation
-  // Return res
-  // console.log('Content-Type:', req.headers['content-type']);
-  // console.log('Body:', req.body);
   const { email, username, password, fullname } = req.body;
-  // console.log(
-  //   `Email: ${email} username:${username}, password:${password} fullname:${fullname}`,
-  // );
-  //   Using some method to check that even after trim are we still getting the empty result
-  if (
-    [fullname, email, username, password].some((field) => field?.trim() === '')
-  ) {
-    throw new ApiError(400, 'All is required');
+
+  if ([fullname, email, username, password].some((field) => !field || field.trim() === '')) {
+    throw new ApiError(400, 'All fields are required');
   }
 
   const existedUser = await User.findOne({
-    $or: [{ email }],
+    $or: [{ email }, { username: username.toLowerCase() }],
   });
 
   if (existedUser) {
-    throw new ApiError(409, 'User with email already exists');
+    throw new ApiError(409, 'User with email or username already exists');
   }
 
   const user = await User.create({
@@ -71,23 +51,16 @@ const registerUser = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(200, createdUser, 'User Registered successfully!'));
+    .json(new ApiResponse(201, createdUser, 'User Registered successfully!'));
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  // Check if request exists or not
-  // Check if all the data that is give is valid or not, trim, etc
-  // Check if account exist
-  // check if the password that is sent is equal or not, for that decrypt the passwordas well then check it
-  // If the account exists in db & matches the password, redirect to next page
-
   const { email, password } = req.body;
 
-  if (!email) {
-    throw new ApiError(400, 'Email is required');
+  if (!email || !password) {
+    throw new ApiError(400, 'Email and password are required');
   }
 
-  // Await cuz it take times to see in database
   const user = await User.findOne({ email });
 
   if (!user) {
@@ -97,7 +70,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const isPasswordCorrect = await user.isPasswordCorrect(password);
 
   if (!isPasswordCorrect) {
-    throw new ApiError(401, 'Invalid User credentials');
+    throw new ApiError(401, 'Invalid user credentials');
   }
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
@@ -108,10 +81,9 @@ const loginUser = asyncHandler(async (req, res) => {
     '-password -refreshToken',
   );
 
-  // This ensures that cookies are only modified in server and not frontend
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
   };
 
   return res
@@ -131,37 +103,35 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
-    {
-      new: true,
-    },
+    { new: true },
   );
 
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
   };
 
   return res
     .status(200)
     .clearCookie('accessToken', options)
     .clearCookie('refreshToken', options)
-    .json(new ApiResponse(200, {}, 'Logout successfull'));
+    .json(new ApiResponse(200, {}, 'Logout successful'));
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
-    req.cookies.refreshToken || req.body.refreshToken;
+    req.cookies?.refreshToken || req.body.refreshToken;
 
   if (!incomingRefreshToken) {
     throw new ApiError(401, 'Unauthorized request');
   }
+
   try {
-    // Verify the token
-    const decodedToken = await jwt.verify(
+    const decodedToken = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET,
     );
@@ -178,30 +148,88 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
     };
 
-    const { accessToken, newRefreshToken } =
+    const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshTokens(user._id);
 
     return res
       .status(200)
-      .cookie('Access Token ', accessToken)
-      .cookie('Refresh Token ', newRefreshToken)
+      .cookie('accessToken', accessToken, options)
+      .cookie('refreshToken', newRefreshToken, options)
       .json(
         new ApiResponse(
           200,
-          { accessToken, newRefreshToken },
+          { accessToken, refreshToken: newRefreshToken },
           'Access token refreshed',
         ),
       );
   } catch (error) {
     throw new ApiError(
       401,
-      error?.message ||
-        'Something went wrong while refreshing the access token',
+      error?.message || 'Something went wrong while refreshing the access token',
     );
   }
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    throw new ApiError(400, 'Old password and new password are required');
+  }
+
+  const user = await User.findById(req.user?._id);
+
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, 'Incorrect old password');
+  }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, 'Password changed successfully'));
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, 'Current user fetched successfully'));
+});
+
+const changeCurrentName = asyncHandler(async (req, res) => {
+  const { fullname } = req.body;
+
+  if (!fullname) {
+    throw new ApiError(400, 'Full name is required');
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        fullname,
+      },
+    },
+    { new: true },
+  ).select('-password');
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, 'Account details updated successfully'));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  changeCurrentPassword,
+  getCurrentUser,
+  changeCurrentName,
+};
