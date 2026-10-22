@@ -1,11 +1,10 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap');
 
 @theme {
-  /* Typography - Inter as practical substitute for Universal Sans */
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, Arial, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
-  /* Tesla-inspired colors */
   --color-primary: #171717;
   --color-primary-hover: #5580F0;
   --color-primary-active: #2D58CC;
@@ -21,260 +20,243 @@
 
   --color-hairline: #EEEEEE;
   --color-border: #D0D1D2;
-
 }
 
-/* Optional dark support later */
-html.dark,
-body.dark {
-  @apply bg-[#171A20] text-white;
+.landing-page {
+  --landing-canvas: #f2f2f1;
+  --landing-surface: #fff;
+  --landing-text: #282828;
+  --landing-muted: #72726f;
+  --landing-border: #d1d1cd;
+  --landing-accent: #fa3600;
+  min-height: 100vh;
+  overflow: clip;
+  background: var(--landing-canvas);
+  color: var(--landing-text);
+  font-family: "Space Grotesk", Inter, system-ui, sans-serif;
+  letter-spacing: -0.015em;
+  background-image:
+    linear-gradient(rgb(40 40 40 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(40 40 40 / 4%) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.landing-page button,
+.landing-page a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.landing-page button:focus-visible,
+.landing-page a:focus-visible {
+  outline: 2px solid var(--landing-accent);
+  outline-offset: 4px;
 }
 
 .public-header {
   position: fixed;
   z-index: 80;
-  top: 0;
-  left: 0;
-  right: 0;
-  min-height: 64px;
+  inset: 0 0 auto;
+  min-height: 68px;
   display: flex;
   align-items: center;
-  padding: 0 28px;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 0 clamp(18px, 4vw, 64px);
   border-bottom: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);  /* bro this is for the safari browser */
+  background: rgb(242 242 241 / 88%);
+  backdrop-filter: blur(14px);
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.public-header.is-scrolled {
+  border-color: var(--landing-border);
+  background: rgb(242 242 241 / 96%);
 }
 
 .public-brand {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 10px;
-  color: #fa3600;
-  font-size: 14px;
+  color: var(--landing-text);
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: -0.03em;
-  text-transform: uppercase;
   text-decoration: none;
-  white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .public-brand em {
-  color: rgba(208, 209, 210, 0.7);
+  color: var(--landing-accent);
   font-style: normal;
 }
 
 .brand-mark {
+  position: relative;
   display: inline-flex;
-  align-items: flex-end;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
   gap: 3px;
-  height: 20px;
+  border: 1px solid var(--landing-text);
 }
 
 .brand-mark i {
   display: block;
-  width: 4px;
-  background: #171717;
+  width: 3px;
+  background: var(--landing-text);
 }
 
 .brand-mark i:nth-child(1) {
-  height: 19px;
+  height: 7px;
 }
 
 .brand-mark i:nth-child(2) {
-  height: 15px;
+  height: 12px;
 }
 
 .brand-mark i:nth-child(3) {
-  height: 20px;
+  height: 17px;
+  background: var(--landing-accent);
 }
 
 .public-nav {
-  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: clamp(3px, 1vw, 16px);
 }
 
-.public-nav > a,
+.public-nav > button,
 .public-sign-in {
   display: inline-flex;
-  min-height: 38px;
+  min-height: 40px;
   align-items: center;
-  padding: 0 12px;
-  color: #5c5e62;
+  justify-content: center;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--landing-muted);
   font-size: 10px;
-  font-weight: 500;
-  text-transform: uppercase;
   text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
-.public-nav > a:hover,
+.public-nav > button:hover,
 .public-sign-in:hover {
-  color: #fa3600;
+  color: var(--landing-accent);
 }
 
 .public-nav__actions {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-left: 18px;
+  gap: 10px;
+  margin-left: 12px;
   padding-left: 18px;
-  border-left: 1px solid #d0d1d2;
+  border-left: 1px solid var(--landing-border);
 }
 
-.public-nav .button.primary {
+.landing-page .button {
   display: inline-flex;
-  min-height: 38px;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   padding: 0 16px;
-  background: #fa3600;
-  color: #fff;
+  border: 1px solid var(--landing-border);
+  background: transparent;
+  color: var(--landing-text);
   font-size: 10px;
-  font-weight: 500;
+  text-align: center;
   text-decoration: none;
   text-transform: uppercase;
-  transition: background-color 0.2s ease;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  cursor: pointer;
 }
 
-.public-nav .button.primary:hover {
-  background: #e23100;
+.landing-page .button:hover {
+  border-color: var(--landing-text);
+  background: var(--landing-surface);
 }
 
-@media (max-width: 700px) {
-  .public-header {
-    padding: 0 16px;
-  }
-
-  .public-nav {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 2px;
-  }
-
-  .public-nav > a {
-    padding: 0 6px;
-    font-size: 9px;
-  }
-
-  .public-nav__actions {
-    gap: 4px;
-    margin-left: 4px;
-    padding-left: 6px;
-  }
-
-  .public-nav .button.primary {
-    padding: 0 8px;
-    font-size: 9px;
-  }
+.landing-page .button.primary {
+  border-color: var(--landing-accent);
+  background: var(--landing-accent);
+  color: #fff;
 }
 
+.landing-page .button.primary:hover {
+  border-color: #d92f00;
+  background: #d92f00;
+}
+
+.public-nav .button {
+  min-height: 38px;
+  padding-inline: 14px;
+}
 
 .public-menu {
   display: none;
   width: 40px;
   height: 40px;
-  margin-left: auto;
   align-items: center;
   justify-content: center;
-  border: 1px solid #d0d1d2;
-  background: #fff;
-  color:#fa3600 ;
+  border: 1px solid var(--landing-border);
+  background: transparent;
   font-size: 20px;
   cursor: pointer;
 }
 
 @media (max-width: 700px) {
   .public-header {
-    height: 64px;
-    padding: 0 16px;
+    min-height: 64px;
+    padding-inline: 16px;
   }
 
   .public-menu {
-    display: flex;
+    display: inline-flex;
+    flex: 0 0 auto;
   }
 
   .public-nav {
-    display: none;
     position: absolute;
     top: 64px;
-    left: 0;
     right: 0;
-    margin: 0;
-    padding: 16px;
+    left: 0;
+    display: none;
     align-items: stretch;
     flex-direction: column;
-    gap: 6px;
-    border-bottom: 1px solid #d0d1d2;
-    background: #fff;
+    gap: 4px;
+    padding: 12px 16px 18px;
+    border-bottom: 1px solid var(--landing-border);
+    background: var(--landing-canvas);
   }
 
   .public-nav.is-open {
     display: flex;
   }
 
-  .public-nav > a {
+  .public-nav > button {
     min-height: 44px;
-    padding: 0 12px;
+    justify-content: flex-start;
+    padding-inline: 12px;
     font-size: 11px;
   }
 
   .public-nav__actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
     margin: 8px 0 0;
     padding: 12px 0 0;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
+    border-top: 1px solid var(--landing-border);
     border-left: 0;
-    border-top: 1px solid #d0d1d2;
   }
 
   .public-nav__actions > a {
     min-height: 42px;
     justify-content: center;
-  }
-}
-
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 80px;
-}
-
-body {
-  overflow-x: clip;
-}
-
-.public-header {
-  border-bottom-color: rgba(208, 209, 210, 0.7);
-}
-
-.public-menu {
-  border-radius: 6px;
-  transition: background-color 160ms ease;
-}
-
-.public-menu:hover {
-  background: #f4f4f4;
-}
-
-.public-menu:focus-visible,
-.public-nav a:focus-visible {
-  outline: 2px solid #e23100;
-  outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  .public-menu,
-  #how-it-works article {
-    transition: none;
-  }
-
-  #how-it-works article:hover {
-    transform: none;
   }
 }
