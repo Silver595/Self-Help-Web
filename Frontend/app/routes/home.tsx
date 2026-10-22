@@ -8,7 +8,12 @@ const workflow = [
   ['03', 'Understand', 'Review recorded patterns in Timeline and Insights.'],
   ['04', 'Return', 'Revisit what changed and what still matters.'],
 ];
-
+const historyEvents = [
+  ['08:42', 'Reading marked complete', '20 minutes · Reading habit'],
+  ['08:42', 'Today progress updates', 'One of four practices'],
+  ['08:43', 'Timeline event appears', 'Source remains attached'],
+  ['20:04', 'Reflection adds context', 'Atomic Habits · What stayed with me'],
+];
 const productViews = [
   ['Today', 'One calm place for the next useful action.'],
   ['Habits', 'Repeatable practices without punishment-based streaks.'],
@@ -314,6 +319,29 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+        <section className="landing-section history-section" id="timeline-story">
+          <header className="landing-section__header">
+            <span className="eyebrow">[03] ACTION BECOMES HISTORY</span>
+            <h2>
+              A small action stays
+              <br />
+              connected to its meaning.
+            </h2>
+          </header>
+
+          <div className="history-sequence">
+            {historyEvents.map(([time, title, copy], index) => (
+              <article key={`${time}-${title}`}>
+                <span>{time}</span>
+                <i>{String(index + 1).padStart(2, '0')}</i>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{copy}</p>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
       </main>
