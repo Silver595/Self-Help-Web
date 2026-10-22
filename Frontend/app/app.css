@@ -917,3 +917,65 @@ body {
     padding: 20px;
   }
 }
+.history-section {
+  background: rgb(255 255 255 / 32%);
+}
+
+.history-sequence {
+  max-width: 850px;
+  margin-left: auto;
+  border-top: 1px solid var(--landing-border);
+}
+
+.history-sequence article {
+  display: grid;
+  grid-template-columns: 70px 44px minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+  padding: 23px 0;
+  border-bottom: 1px solid var(--landing-border);
+}
+
+.history-sequence article > span {
+  padding-top: 3px;
+  color: var(--landing-muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+}
+
+.history-sequence article > i {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--landing-border);
+  color: var(--landing-accent);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px;
+  font-style: normal;
+}
+
+.history-sequence h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.history-sequence p {
+  margin-bottom: 0;
+  color: var(--landing-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+@media (max-width: 700px) {
+  .history-sequence article {
+    grid-template-columns: 48px 32px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .history-sequence article > i {
+    width: 30px;
+    height: 30px;
+  }
+}
