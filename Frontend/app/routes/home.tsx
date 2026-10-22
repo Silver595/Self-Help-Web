@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react';
 import type { Route } from './+types/home';
 import { Link } from 'react-router';
 
+const workflow = [
+  ['01', 'Capture', 'Complete a habit, write a thought, or save a resource.'],
+  ['02', 'Connect', 'Keep sources and related records attached.'],
+  ['03', 'Understand', 'Review recorded patterns in Timeline and Insights.'],
+  ['04', 'Return', 'Revisit what changed and what still matters.'],
+];
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: 'Growth OS | A personal growth workspace' },
@@ -206,7 +213,6 @@ export default function Home() {
                         ? 'has-data'
                         : ''
                     }
-                    // fck lot of thngs need to add [need some time!]
                   />
                 ))}
               </div>
@@ -220,6 +226,28 @@ export default function Home() {
             <span>Continue</span>
             <span aria-hidden="true">↓</span>
           </button>
+        </section>
+
+        <section className="landing-section workflow-section" id="how-it-works">
+          <header className="landing-section__header">
+            <span className="eyebrow">[01] HOW IT CONNECTS</span>
+            <h2>
+              One record, built
+              <br />
+              from meaningful actions.
+            </h2>
+          </header>
+
+          <div className="workflow-line">
+            {workflow.map(([index, title, copy]) => (
+              <article key={index}>
+                <span>{index}</span>
+                <i />
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </article>
+            ))}
+          </div>
         </section>
       </main>
     </div>
