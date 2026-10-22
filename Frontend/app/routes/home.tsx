@@ -9,6 +9,15 @@ const workflow = [
   ['04', 'Return', 'Revisit what changed and what still matters.'],
 ];
 
+const productViews = [
+  ['Today', 'One calm place for the next useful action.'],
+  ['Habits', 'Repeatable practices without punishment-based streaks.'],
+  ['Library', 'A personal archive for what teaches you.'],
+  ['Journal', 'Reflections connected to the things that inspired them.'],
+  ['Timeline', 'A trustworthy history of actions, thoughts, and learning.'],
+  ['Insights', 'Evidence-based patterns with their source data attached.'],
+] as const;
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: 'Growth OS | A personal growth workspace' },
@@ -22,6 +31,7 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedView, setSelectedView] = useState(4);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -247,6 +257,63 @@ export default function Home() {
                 <p>{copy}</p>
               </article>
             ))}
+          </div>
+        </section>
+        <section className="landing-section product-section" id="product">
+          <header className="landing-section__header">
+            <span className="eyebrow">[02] SIX VIEWS, ONE HISTORY</span>
+            <h2>Not six disconnected tools.</h2>
+            <p>Six ways to understand the same personal record.</p>
+          </header>
+
+          <div className="product-walkthrough">
+            <div className="product-index" role="tablist" aria-label="Product views">
+              {productViews.map(([title, copy], index) => (
+                <button
+                  key={title}
+                  type="button"
+                  role="tab"
+                  aria-selected={selectedView === index}
+                  className={selectedView === index ? 'is-active' : ''}
+                  onClick={() => setSelectedView(index)}
+                >
+                  <span>0{index + 1}</span>
+                  <strong>{title}</strong>
+                  <span className="product-index__arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                  <small>{copy}</small>
+                </button>
+              ))}
+            </div>
+
+            <div className="product-preview" role="tabpanel">
+              <div className="product-preview__top">
+                <span className="product-preview__status" />
+                Growth OS / {productViews[selectedView][0]}
+                <b>PRODUCT VIEW</b>
+              </div>
+
+              <div className="product-preview__canvas">
+                <span className="eyebrow">
+                  {selectedView === 4
+                    ? 'YOUR PERSONAL HISTORY'
+                    : `VIEW 0${selectedView + 1}`}
+                </span>
+                <h3>{productViews[selectedView][0]}</h3>
+                <p>{productViews[selectedView][1]}</p>
+
+                <div
+                  className={`preview-diagram preview-diagram--${selectedView}`}
+                  aria-hidden="true"
+                >
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <i key={index} />
+                  ))}
+                  <span />
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
