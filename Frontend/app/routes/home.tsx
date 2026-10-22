@@ -2,6 +2,29 @@ import { useEffect, useState } from 'react';
 import type { Route } from './+types/home';
 import { Link } from 'react-router';
 
+const productViews = [
+  ['Today', 'One calm place for the next useful action.'],
+  ['Habits', 'Repeatable practices without punishment-based streaks.'],
+  ['Library', 'A personal archive for what teaches you.'],
+  ['Journal', 'Reflections connected to the things that inspired them.'],
+  ['Timeline', 'A trustworthy history of actions, thoughts, and learning.'],
+  ['Insights', 'Evidence-based patterns with their source data attached.'],
+] as const;
+
+const workflow = [
+  ['01', 'Capture', 'Complete a habit, write a thought, or save a resource.'],
+  ['02', 'Connect', 'Keep sources and related records attached.'],
+  ['03', 'Understand', 'Review recorded patterns in Timeline and Insights.'],
+  ['04', 'Return', 'Revisit what changed and what still matters.'],
+];
+
+const historyEvents = [
+  ['08:42', 'Reading marked complete', '20 minutes · Reading habit'],
+  ['08:42', 'Today progress updates', 'One of four practices'],
+  ['08:43', 'Timeline event appears', 'Source remains attached'],
+  ['20:04', 'Reflection adds context', 'Atomic Habits · What stayed with me'],
+];
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: 'Growth OS | A personal growth workspace' },
@@ -16,6 +39,7 @@ export function meta({}: Route.MetaArgs) {
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [selectedView, setSelectedView] = useState(4);
 
   useEffect(() => {
     const updateScroll = () => setScrolled(window.scrollY > 32);
@@ -206,7 +230,6 @@ export default function Home() {
                         ? 'has-data'
                         : ''
                     }
-                    // fck lot of thngs need to add [need some time!]
                   />
                 ))}
               </div>
@@ -221,7 +244,219 @@ export default function Home() {
             <span aria-hidden="true">↓</span>
           </button>
         </section>
+
+        <section className="landing-section workflow-section" id="how-it-works">
+          <header className="landing-section__header">
+            <span className="eyebrow">[01] HOW IT CONNECTS</span>
+            <h2>
+              One record, built
+              <br />
+              from meaningful actions.
+            </h2>
+          </header>
+
+          <div className="workflow-line">
+            {workflow.map(([index, title, copy]) => (
+              <article key={index}>
+                <span>{index}</span>
+                <i />
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="landing-section product-section" id="product">
+          <header className="landing-section__header">
+            <span className="eyebrow">[02] SIX VIEWS, ONE HISTORY</span>
+            <h2>Not six disconnected tools.</h2>
+            <p>Six ways to understand the same personal record.</p>
+          </header>
+
+          <div className="product-walkthrough">
+            <div className="product-index" role="tablist" aria-label="Product views">
+              {productViews.map(([title, copy], index) => (
+                <button
+                  key={title}
+                  type="button"
+                  role="tab"
+                  aria-selected={selectedView === index}
+                  className={selectedView === index ? 'is-active' : ''}
+                  onClick={() => setSelectedView(index)}
+                >
+                  <span>0{index + 1}</span>
+                  <strong>{title}</strong>
+                  <span className="product-index__arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                  <small>{copy}</small>
+                </button>
+              ))}
+            </div>
+
+            <div className="product-preview" role="tabpanel">
+              <div className="product-preview__top">
+                <span className="product-preview__status" />
+                Growth OS / {productViews[selectedView][0]}
+                <b>PRODUCT VIEW</b>
+              </div>
+
+              <div className="product-preview__canvas">
+                <span className="eyebrow">
+                  {selectedView === 4
+                    ? 'YOUR PERSONAL HISTORY'
+                    : `VIEW 0${selectedView + 1}`}
+                </span>
+                <h3>{productViews[selectedView][0]}</h3>
+                <p>{productViews[selectedView][1]}</p>
+
+                <div
+                  className={`preview-diagram preview-diagram--${selectedView}`}
+                  aria-hidden="true"
+                >
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <i key={index} />
+                  ))}
+                  <span />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="landing-section history-section" id="timeline-story">
+          <header className="landing-section__header">
+            <span className="eyebrow">[03] ACTION BECOMES HISTORY</span>
+            <h2>
+              A small action stays
+              <br />
+              connected to its meaning.
+            </h2>
+          </header>
+
+          <div className="history-sequence">
+            {historyEvents.map(([time, title, copy], index) => (
+              <article key={`${time}-${title}`}>
+                <span>{time}</span>
+                <i>{String(index + 1).padStart(2, '0')}</i>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{copy}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="landing-section evidence-section" id="insights-preview">
+          <header className="landing-section__header">
+            <span className="eyebrow">[04] INSIGHTS WITH CONTEXT</span>
+            <h2>Evidence, not pressure.</h2>
+            <p>
+              Useful statistics describe what was recorded. They do not turn a
+              missed day into a verdict.
+            </p>
+          </header>
+
+          <div className="evidence-preview">
+            <div className="evidence-activity">
+              <span className="eyebrow">ACTIVITY / SAMPLE VIEW</span>
+              <div className="activity-grid" aria-hidden="true">
+                {Array.from({ length: 70 }, (_, index) => (
+                  <i
+                    key={index}
+                    className={
+                      [2, 3, 7, 11, 12, 18, 19, 24, 28, 29, 35, 42, 43, 49, 56, 61, 66].includes(
+                        index,
+                      )
+                        ? 'has-data'
+                        : ''
+                    }
+                  />
+                ))}
+              </div>
+              <small>Illustrative layout, not your actual activity data.</small>
+            </div>
+
+            <div className="evidence-statement">
+              <span>OBS / 01</span>
+              <strong>
+                Your progress should explain what happened, not judge you for
+                it.
+              </strong>
+              <small>Patterns should remain connected to their source records.</small>
+            </div>
+          </div>
+        </section>
+
+        <section className="landing-section privacy-section" id="privacy">
+          <span className="eyebrow">[05] YOUR RECORDS, YOUR CONTROL</span>
+          <div>
+            <h2>A workspace that respects the life inside it.</h2>
+            <p>
+              Clear source relationships. Reversible low-risk actions. No
+              guilt-driven warnings or manipulative engagement language.
+            </p>
+          </div>
+        </section>
+
+        <section className="landing-final">
+          <span className="eyebrow">START WHERE YOU ARE</span>
+          <h2>Start with one useful action.</h2>
+          <p>
+            Complete a practice, write a thought, or save something worth
+            returning to.
+          </p>
+          <div>
+            <Link to="/signup" className="button primary">
+              Create your workspace
+            </Link>
+            <Link to="/login" className="button">
+              Sign in
+            </Link>
+          </div>
+        </section>
       </main>
+
+      <footer className="public-footer">
+        <div className="public-footer__brand">
+          <Link to="/" className="public-brand">
+            <span className="brand-mark" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span>
+              Growth <em>OS</em>
+            </span>
+          </Link>
+          <p>A measured record of a growing life.</p>
+        </div>
+
+        <div>
+          <strong>Product</strong>
+          <button onClick={() => scrollToSection('product')}>Product views</button>
+          <button onClick={() => scrollToSection('timeline-story')}>Timeline</button>
+          <button onClick={() => scrollToSection('insights-preview')}>Insights</button>
+        </div>
+
+        <div>
+          <strong>Resources</strong>
+          <button onClick={() => scrollToSection('how-it-works')}>
+            How it works
+          </button>
+          <button onClick={() => scrollToSection('privacy')}>Privacy</button>
+          <span>Accessibility</span>
+        </div>
+
+        <div>
+          <strong>Account</strong>
+          <Link to="/login">Sign in</Link>
+          <Link to="/signup">Create account</Link>
+          <span>© 2026 Growth OS</span>
+        </div>
+      </footer>
     </div>
   );
 }
