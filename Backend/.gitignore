@@ -35,6 +35,8 @@ coverage/
 ### React ###
 node_modules/
 build/
+.env*
+env_downloaded
 .env
 .env.local
 .env.development.local

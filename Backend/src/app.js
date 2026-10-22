@@ -1,10 +1,28 @@
 // Where you create and configure the Express app: middleware setup (cors, express.json(), cookieParser), and mounting your routes. It only configures the app and does not start the server.
-
-import express from 'express';
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
+import mongoose from "mongoose";
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
+
+// bro! the below health check section is for CI that we need to implement later on
+
+app.get("/ready", (_req, res) => {
+  res.status(200).json({
+    status: "ok",
+    uptime: process.uptime(),
+  });
+});
+
+app.get("ready", (_req, res) => {
+  // this is for readiness : for checks the MongoDB connection
+  const dbConnections = mongoose.connection.readyState === 1;
+  res.status(dbConnections ? 200 : 503).json({
+    status: dbConnections ? "ready" : "not_ready",
+    db: dbConnections ? "up" : "down",
+  });
+});
 
 app.use(
   cors({
@@ -15,42 +33,42 @@ app.use(
 
 app.use(
   express.json({
-    limit: '16kb',
+    limit: "16kb",
   }),
 );
 
 app.use(
   express.urlencoded({
     extended: true,
-    limit: '16kb',
+    limit: "16kb",
   }),
 );
-app.use(express.static('public'));
+app.use(express.static("public"));
 
-app.use(cookieParser())
+app.use(cookieParser());
 
 // Routes
-import userRouter from './routes/user.routes.js'
+import userRouter from "./routes/user.routes.js";
 
 // Routes declarations
-app.use("/api/v1/users",userRouter)
+app.use("/api/v1/users", userRouter);
 // Will pass to the users route https://localhost:8000/api/v1/users/login
 
-import resourceRouter from './routes/resource.routes.js';
+import resourceRouter from "./routes/resource.routes.js";
 
 // Mount under your API version prefix
-app.use('/api/v1/resources', resourceRouter);
+app.use("/api/v1/resources", resourceRouter);
 
-import habitRouter from './routes/habit.routes.js';
+import habitRouter from "./routes/habit.routes.js";
 
-app.use('/api/v1/habits', habitRouter);
+app.use("/api/v1/habits", habitRouter);
 
-import noteRouter from './routes/note.routes.js';
+import noteRouter from "./routes/note.routes.js";
 
-app.use('/api/v1/notes', noteRouter);
+app.use("/api/v1/notes", noteRouter);
 
-import journalRouter from './routes/journal.routes.js';
+import journalRouter from "./routes/journal.routes.js";
 
-app.use('/api/v1/journals', journalRouter);
+app.use("/api/v1/journals", journalRouter);
 
 export { app };
