@@ -37,72 +37,73 @@ body.dark {
   @apply bg-[#171A20] text-white;
 }
 
-.public-header{
-    position: fixed;
-    z-index: 80;
-    top: 0;
-    left: 0;
-    right: 0;
-    min-height: 64px;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    border-bottom: 1px solid transparent;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(12px);
+.public-header {
+  position: fixed;
+  z-index: 80;
+  top: 0;
+  left: 0;
+  right: 0;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  border-bottom: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);  /* bro this is for the safari browser */
 }
 
-.public-brand{
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    color: #171717;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: -0.03em; /* i m not sure here*/
-    text-transform: uppercase;
-    text-decoration: none;
-    white-space: nowrap;
+.public-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #171717;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .public-brand em {
-    color: #5580f0; /* We will change this later on if we want Orange - [#f73601]*/
-    font-style: normal;
+  color: #5580f0;
+  font-style: normal;
 }
 
-.brand-mark{
-    display: inline-flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 20px;
+.brand-mark {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 20px;
 }
 
 .brand-mark i {
-    display: block;
-    width: 4px;
-    background: #171717;
+  display: block;
+  width: 4px;
+  background: #171717;
 }
 
-.brand-mark i:nth-child(1){
-    height: 9px;
+.brand-mark i:nth-child(1) {
+  height: 19px;
 }
 
-.brand-mark i:nth-child(2){
-    height: 15px;
+.brand-mark i:nth-child(2) {
+  height: 15px;
 }
 
-.brand-mark i:nth-child(3){
-    height: 20px;
+.brand-mark i:nth-child(3) {
+  height: 20px;
 }
 
 .public-nav {
-    margin-left:auto;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-public-nav > a,
+.public-nav > a,
 .public-sign-in {
   display: inline-flex;
   min-height: 38px;
@@ -113,4 +114,65 @@ public-nav > a,
   font-weight: 500;
   text-transform: uppercase;
   text-decoration: none;
+}
+
+.public-nav > a:hover,
+.public-sign-in:hover {
+  color: #5580f0;
+}
+
+.public-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: 18px;
+  padding-left: 18px;
+  border-left: 1px solid #d0d1d2;
+}
+
+.public-nav .button.primary {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  background: #171717;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 500;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease;
+}
+
+.public-nav .button.primary:hover {
+  background: #333;
+}
+
+@media (max-width: 700px) {
+  .public-header {
+    padding: 0 16px;
+  }
+
+  .public-nav {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 2px;
+  }
+
+  .public-nav > a {
+    padding: 0 6px;
+    font-size: 9px;
+  }
+
+  .public-nav__actions {
+    gap: 4px;
+    margin-left: 4px;
+    padding-left: 6px;
+  }
+
+  .public-nav .button.primary {
+    padding: 0 8px;
+    font-size: 9px;
+  }
 }
