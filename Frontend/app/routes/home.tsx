@@ -22,28 +22,38 @@ export default function Home() {
   return (
     <main className='min-h-screen w-full overflow-x-clip bg-white text-[#171A20]'>
       {/* Header */}
-      <header className='w-full border-b border-[#EEEEEE]'>
-        <nav
-          aria-label='Main navigation'
-          className='mx-auto flex min-h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8'
-        >
-          <Link
-            to='/'
-            className='shrink-0 text-base font-semibold tracking-tight'
-          >
-            Growth OS<span className='text-[#171717]'>.</span>
-          </Link>
 
-          <div className='flex items-center gap-3 sm:gap-6'>
+      {/* Header */}
+      <header className="public-header">
+        <Link to="/" className="public-brand" aria-label="Growth OS home">
+          <span className="brand-mark" aria-hidden="true">
+            <i />
+            <i />
 
+            <i />
+          </span>
+              <span>
+            Growth <em>OS</em>
+                </span>
+        </Link>
 
-            <Link
-              to='/login'
-              className='inline-flex min-h-10 items-center justify-center rounded-md bg-[#171717] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#333333] sm:px-4'
-            >
-              Get Started
+        <nav className="public-nav" aria-label="Public navigation">
+
+          <a href="#product">Product</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#timeline-story">Timeline</a>
+          <a href="#privacy">Privacy</a>
+
+          <span className="public-nav__actions">
+            <Link to="/login" className="public-sign-in">
+              Sign in
             </Link>
-          </div>
+
+            <Link to="/signup" className="button primary">
+              Start your workspace
+            </Link>
+          </span>
+
         </nav>
       </header>
 
@@ -141,7 +151,7 @@ export default function Home() {
       {/* How it works */}
       <section
         id='how-it-works'
-        className='border-y border-[#EEEEEE] bg-[#F8F8F8]'
+        className='border-y border-[#EEEEEE] bg-[#FAFAFA]'
       >
         <div className='mx-auto w-full  px-4 py-14 sm:px-6 sm:py-20 lg:px-8'>
           <div className='mx-auto mb-10 text-center sm:mb-12'>
@@ -160,7 +170,7 @@ export default function Home() {
           </div>
 
           <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6'>
-            <article className='rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7'>
+            <article className='transition-colors duration-200 hover:border-[#D4D4D4] rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7'>
               <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2F2F2] text-sm font-semibold text-[#171717]'>
                 01
               </span>
@@ -173,7 +183,7 @@ export default function Home() {
               </p>
             </article>
 
-            <article className='rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7'>
+            <article className=' rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7 transition-colors duration-200 hover:border-[#D4D4D4] '>
               <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2F2F2] text-sm font-semibold text-[#171717]'>
                 02
               </span>
@@ -186,7 +196,7 @@ export default function Home() {
               </p>
             </article>
 
-            <article className='rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7 sm:col-span-2 lg:col-span-1'>
+            <article className='rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7 sm:col-span-2 lg:col-span-1 transition-colors duration-200 hover:border-[#D4D4D4]'>
               <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2F2F2] text-sm font-semibold text-[#171717]'>
                 03
               </span>
