@@ -36,3 +36,81 @@ html.dark,
 body.dark {
   @apply bg-[#171A20] text-white;
 }
+
+.public-header{
+    position: fixed;
+    z-index: 80;
+    top: 0;
+    left: 0;
+    right: 0;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+}
+
+.public-brand{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #171717;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.03em; /* i m not sure here*/
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.public-brand em {
+    color: #5580f0; /* We will change this later on if we want Orange - [#f73601]*/
+    font-style: normal;
+}
+
+.brand-mark{
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 20px;
+}
+
+.brand-mark i {
+    display: block;
+    width: 4px;
+    background: #171717;
+}
+
+.brand-mark i:nth-child(1){
+    height: 9px;
+}
+
+.brand-mark i:nth-child(2){
+    height: 15px;
+}
+
+.brand-mark i:nth-child(3){
+    height: 20px;
+}
+
+.public-nav {
+    margin-left:auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+public-nav > a,
+.public-sign-in {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  padding: 0 12px;
+  color: #5c5e62;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  text-decoration: none;
+}
