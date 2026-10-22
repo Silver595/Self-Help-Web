@@ -2,18 +2,6 @@ import { useEffect, useState } from 'react';
 import type { Route } from './+types/home';
 import { Link } from 'react-router';
 
-const workflow = [
-  ['01', 'Capture', 'Complete a habit, write a thought, or save a resource.'],
-  ['02', 'Connect', 'Keep sources and related records attached.'],
-  ['03', 'Understand', 'Review recorded patterns in Timeline and Insights.'],
-  ['04', 'Return', 'Revisit what changed and what still matters.'],
-];
-const historyEvents = [
-  ['08:42', 'Reading marked complete', '20 minutes · Reading habit'],
-  ['08:42', 'Today progress updates', 'One of four practices'],
-  ['08:43', 'Timeline event appears', 'Source remains attached'],
-  ['20:04', 'Reflection adds context', 'Atomic Habits · What stayed with me'],
-];
 const productViews = [
   ['Today', 'One calm place for the next useful action.'],
   ['Habits', 'Repeatable practices without punishment-based streaks.'],
@@ -22,6 +10,20 @@ const productViews = [
   ['Timeline', 'A trustworthy history of actions, thoughts, and learning.'],
   ['Insights', 'Evidence-based patterns with their source data attached.'],
 ] as const;
+
+const workflow = [
+  ['01', 'Capture', 'Complete a habit, write a thought, or save a resource.'],
+  ['02', 'Connect', 'Keep sources and related records attached.'],
+  ['03', 'Understand', 'Review recorded patterns in Timeline and Insights.'],
+  ['04', 'Return', 'Revisit what changed and what still matters.'],
+];
+
+const historyEvents = [
+  ['08:42', 'Reading marked complete', '20 minutes · Reading habit'],
+  ['08:42', 'Today progress updates', 'One of four practices'],
+  ['08:43', 'Timeline event appears', 'Source remains attached'],
+  ['20:04', 'Reflection adds context', 'Atomic Habits · What stayed with me'],
+];
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -36,8 +38,8 @@ export function meta({}: Route.MetaArgs) {
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selectedView, setSelectedView] = useState(4);
   const [scrolled, setScrolled] = useState(false);
+  const [selectedView, setSelectedView] = useState(4);
 
   useEffect(() => {
     const updateScroll = () => setScrolled(window.scrollY > 32);
@@ -264,6 +266,7 @@ export default function Home() {
             ))}
           </div>
         </section>
+
         <section className="landing-section product-section" id="product">
           <header className="landing-section__header">
             <span className="eyebrow">[02] SIX VIEWS, ONE HISTORY</span>
@@ -321,6 +324,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+
         <section className="landing-section history-section" id="timeline-story">
           <header className="landing-section__header">
             <span className="eyebrow">[03] ACTION BECOMES HISTORY</span>
@@ -344,6 +348,7 @@ export default function Home() {
             ))}
           </div>
         </section>
+
         <section className="landing-section evidence-section" id="insights-preview">
           <header className="landing-section__header">
             <span className="eyebrow">[04] INSIGHTS WITH CONTEXT</span>
@@ -384,7 +389,74 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <section className="landing-section privacy-section" id="privacy">
+          <span className="eyebrow">[05] YOUR RECORDS, YOUR CONTROL</span>
+          <div>
+            <h2>A workspace that respects the life inside it.</h2>
+            <p>
+              Clear source relationships. Reversible low-risk actions. No
+              guilt-driven warnings or manipulative engagement language.
+            </p>
+          </div>
+        </section>
+
+        <section className="landing-final">
+          <span className="eyebrow">START WHERE YOU ARE</span>
+          <h2>Start with one useful action.</h2>
+          <p>
+            Complete a practice, write a thought, or save something worth
+            returning to.
+          </p>
+          <div>
+            <Link to="/signup" className="button primary">
+              Create your workspace
+            </Link>
+            <Link to="/login" className="button">
+              Sign in
+            </Link>
+          </div>
+        </section>
       </main>
+
+      <footer className="public-footer">
+        <div className="public-footer__brand">
+          <Link to="/" className="public-brand">
+            <span className="brand-mark" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span>
+              Growth <em>OS</em>
+            </span>
+          </Link>
+          <p>A measured record of a growing life.</p>
+        </div>
+
+        <div>
+          <strong>Product</strong>
+          <button onClick={() => scrollToSection('product')}>Product views</button>
+          <button onClick={() => scrollToSection('timeline-story')}>Timeline</button>
+          <button onClick={() => scrollToSection('insights-preview')}>Insights</button>
+        </div>
+
+        <div>
+          <strong>Resources</strong>
+          <button onClick={() => scrollToSection('how-it-works')}>
+            How it works
+          </button>
+          <button onClick={() => scrollToSection('privacy')}>Privacy</button>
+          <span>Accessibility</span>
+        </div>
+
+        <div>
+          <strong>Account</strong>
+          <Link to="/login">Sign in</Link>
+          <Link to="/signup">Create account</Link>
+          <span>© 2026 Growth OS</span>
+        </div>
+      </footer>
     </div>
   );
 }
