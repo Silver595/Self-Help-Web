@@ -344,6 +344,46 @@ export default function Home() {
             ))}
           </div>
         </section>
+        <section className="landing-section evidence-section" id="insights-preview">
+          <header className="landing-section__header">
+            <span className="eyebrow">[04] INSIGHTS WITH CONTEXT</span>
+            <h2>Evidence, not pressure.</h2>
+            <p>
+              Useful statistics describe what was recorded. They do not turn a
+              missed day into a verdict.
+            </p>
+          </header>
+
+          <div className="evidence-preview">
+            <div className="evidence-activity">
+              <span className="eyebrow">ACTIVITY / SAMPLE VIEW</span>
+              <div className="activity-grid" aria-hidden="true">
+                {Array.from({ length: 70 }, (_, index) => (
+                  <i
+                    key={index}
+                    className={
+                      [2, 3, 7, 11, 12, 18, 19, 24, 28, 29, 35, 42, 43, 49, 56, 61, 66].includes(
+                        index,
+                      )
+                        ? 'has-data'
+                        : ''
+                    }
+                  />
+                ))}
+              </div>
+              <small>Illustrative layout, not your actual activity data.</small>
+            </div>
+
+            <div className="evidence-statement">
+              <span>OBS / 01</span>
+              <strong>
+                Your progress should explain what happened, not judge you for
+                it.
+              </strong>
+              <small>Patterns should remain connected to their source records.</small>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
