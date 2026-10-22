@@ -27,6 +27,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
+  
   const result = registerSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -42,11 +43,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // The difference between findOne and findById is that findOne allows you to search for a document based on any field or combination of fields, while findById specifically searches for a document by its unique identifier (_id). In this case, we are using findOne to check if a user with the provided email already exists in the database.
   const existedUser = await User.findOne({
-    $or: [{ email }],
+    $or: [{ email }, { username: username.toLowerCase() }],
   });
 
   if (existedUser) {
-    throw new ApiError(409, 'User with email already exists');
+    throw new ApiError(409, 'User with email or username already exists');
   }
 
   // Create the user in the database
