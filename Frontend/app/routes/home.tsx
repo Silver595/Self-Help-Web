@@ -13,10 +13,10 @@ export function meta({}: Route.MetaArgs) {
 }
 
 const buttonPrimary =
-  'inline-flex min-h-11 items-center justify-center rounded-md bg-[#3E6AE1] px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#3158C5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3E6AE1]';
+  'inline-flex min-h-11 items-center justify-center rounded-md bg-[#171717] px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-[#333333] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171717]';
 
 const buttonSecondary =
-  'inline-flex min-h-11 items-center justify-center rounded-md border border-[#D0D1D2] bg-white px-5 py-3 text-sm font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3E6AE1]';
+  'inline-flex min-h-11 items-center justify-center rounded-md border border-[#D0D1D2] bg-white px-5 py-3 text-sm font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171717]';
 
 export default function Home() {
   return (
@@ -31,15 +31,15 @@ export default function Home() {
             to='/'
             className='shrink-0 text-base font-semibold tracking-tight'
           >
-            Growth OS<span className='text-[#3E6AE1]'>.</span>
+            Growth OS<span className='text-[#171717]'>.</span>
           </Link>
 
           <div className='flex items-center gap-3 sm:gap-6'>
-           
+
 
             <Link
               to='/login'
-              className='inline-flex min-h-10 items-center justify-center rounded-md bg-[#3E6AE1] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#3158C5] sm:px-4'
+              className='inline-flex min-h-10 items-center justify-center rounded-md bg-[#171717] px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-[#333333] sm:px-4'
             >
               Get Started
             </Link>
@@ -48,19 +48,19 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className='mx-auto  w-full max-w-6xl grid-cols-1 items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 md:gap-12 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-24'>
+      <section className='mx-auto  w-full max-w-6xl grid grid-cols-1 items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 md:gap-12 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-24'>
         {/* Hero copy */}
 
         <div className='flex min-w-0 flex-col items-start gap-8'>
           <div className='space-y-5'>
-            <span className='inline-flex items-center gap-2 rounded-full border border-[#E5E9F5] bg-[#F5F7FF] px-3 py-1.5 text-xs font-medium text-[#3158C5]'>
-              <span className='h-1.5 w-1.5 rounded-full bg-[#3E6AE1]' />
+            <span className='inline-flex items-center gap-2 rounded-full border border-[#E5E5E5] bg-[#F7F7F7] px-3 py-1.5 text-xs font-medium text-[#333333]'>
+              <span className='h-1.5 w-1.5 rounded-full bg-[#171717]' />
               Your personal growth space
             </span>
 
             <h1 className=' text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl lg:text-6xl'>
               Your personal system for{' '}
-              <span className='text-[#3E6AE1]'>growth.</span>
+              <span className='text-[#171717]'>growth.</span>
             </h1>
 
             <p className=' text-base leading-7 text-[#5C5E62] sm:text-lg sm:leading-8'>
@@ -97,7 +97,7 @@ export default function Home() {
               <li className='flex items-start gap-3'>
                 <span
                   aria-hidden='true'
-                  className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#EEF2FF] text-xs font-semibold text-[#3E6AE1]'
+                  className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#F2F2F2] text-xs font-semibold text-[#171717]'
                 >
                   ✓
                 </span>
@@ -107,7 +107,7 @@ export default function Home() {
               <li className='flex items-start gap-3'>
                 <span
                   aria-hidden='true'
-                  className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#EEF2FF] text-xs font-semibold text-[#3E6AE1]'
+                  className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#F2F2F2] text-xs font-semibold text-[#171717]'
                 >
                   ✓
                 </span>
@@ -117,7 +117,7 @@ export default function Home() {
               <li className='flex items-start gap-3'>
                 <span
                   aria-hidden='true'
-                  className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#EEF2FF] text-xs font-semibold text-[#3E6AE1]'
+                  className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#F2F2F2] text-xs font-semibold text-[#171717]'
                 >
                   ✓
                 </span>
@@ -127,7 +127,7 @@ export default function Home() {
               <li className='flex items-start gap-3'>
                 <span
                   aria-hidden='true'
-                  className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#EEF2FF] text-xs font-semibold text-[#3E6AE1]'
+                  className='mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#F2F2F2] text-xs font-semibold text-[#171717]'
                 >
                   ✓
                 </span>
@@ -145,7 +145,7 @@ export default function Home() {
       >
         <div className='mx-auto w-full  px-4 py-14 sm:px-6 sm:py-20 lg:px-8'>
           <div className='mx-auto mb-10 text-center sm:mb-12'>
-            <p className='mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#3E6AE1]'>
+            <p className='mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#171717]'>
               A simpler approach
             </p>
 
@@ -161,7 +161,7 @@ export default function Home() {
 
           <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6'>
             <article className='rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7'>
-              <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#EEF2FF] text-sm font-semibold text-[#3E6AE1]'>
+              <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2F2F2] text-sm font-semibold text-[#171717]'>
                 01
               </span>
 
@@ -174,7 +174,7 @@ export default function Home() {
             </article>
 
             <article className='rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7'>
-              <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#EEF2FF] text-sm font-semibold text-[#3E6AE1]'>
+              <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2F2F2] text-sm font-semibold text-[#171717]'>
                 02
               </span>
 
@@ -187,7 +187,7 @@ export default function Home() {
             </article>
 
             <article className='rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7 sm:col-span-2 lg:col-span-1'>
-              <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#EEF2FF] text-sm font-semibold text-[#3E6AE1]'>
+              <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2F2F2] text-sm font-semibold text-[#171717]'>
                 03
               </span>
 
@@ -205,7 +205,7 @@ export default function Home() {
       {/* Closing CTA */}
       <section className='mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8'>
         <div className='rounded-2xl border border-[#E8E8E8] bg-white px-5 py-12 text-center sm:px-10 sm:py-16'>
-          <p className='mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#3E6AE1]'>
+          <p className='mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#171717]'>
             Start where you are
           </p>
 
