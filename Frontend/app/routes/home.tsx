@@ -1,5 +1,8 @@
 import type { Route } from './+types/home';
 import { Link } from 'react-router';
+import { useState } from 'react';
+
+
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -19,6 +22,8 @@ const buttonSecondary =
   'inline-flex min-h-11 items-center justify-center rounded-md border border-[#D0D1D2] bg-white px-5 py-3 text-sm font-medium text-[#171A20] transition-colors hover:bg-[#F4F4F4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#171717]';
 
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false)
+
   return (
     <main className='min-h-screen w-full overflow-x-clip bg-white text-[#171A20]'>
       {/* Header */}
@@ -37,7 +42,10 @@ export default function Home() {
                 </span>
         </Link>
 
-        <nav className="public-nav" aria-label="Public navigation">
+          <nav
+            className={`public-nav ${menuOpen ? 'is-open' : ''}`}
+            aria-label="Public navigation"
+          >
 
           <a href="#product">Product</a>
           <a href="#how-it-works">How it works</a>
@@ -55,10 +63,20 @@ export default function Home() {
           </span>
 
         </nav>
+
+        <button
+        type='button'
+        className='public-menu'
+        onClick={() => setMenuOpen((open) => !open)}
+        aria-expanded={menuOpen}
+        aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
       </header>
 
       {/* Hero */}
-      <section className='mx-auto  w-full max-w-6xl grid grid-cols-1 items-center gap-10 px-4 py-12 sm:px-6 sm:py-16 md:gap-12 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-24'>
+      <section className='mx-auto  w-full max-w-6xl  grid-cols-1 items-center gap-10 px-4 pb-12 pt-28 py-12 sm:px-6 sm:pb-16 sm:pt-32 sm:py-16 md:gap-12 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:pb-24 lg-pt-36 lg:py-24'>
         {/* Hero copy */}
 
         <div className='flex min-w-0 flex-col items-start gap-8'>
@@ -153,8 +171,8 @@ export default function Home() {
         id='how-it-works'
         className='border-y border-[#EEEEEE] bg-[#FAFAFA]'
       >
-        <div className='mx-auto w-full  px-4 py-14 sm:px-6 sm:py-20 lg:px-8'>
-          <div className='mx-auto mb-10 text-center sm:mb-12'>
+        <div className='mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8'>
+          <div className='mx-auto mb-10 max-w-3xl text-center sm:mb-12'>
             <p className='mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#171717]'>
               A simpler approach
             </p>
@@ -170,7 +188,7 @@ export default function Home() {
           </div>
 
           <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6'>
-            <article className='transition-colors duration-200 hover:border-[#D4D4D4] rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7'>
+            <article className='h-full rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7'>
               <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2F2F2] text-sm font-semibold text-[#171717]'>
                 01
               </span>
@@ -183,7 +201,7 @@ export default function Home() {
               </p>
             </article>
 
-            <article className=' rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7 transition-colors duration-200 hover:border-[#D4D4D4] '>
+            <article className=' rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7 h-full '>
               <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2F2F2] text-sm font-semibold text-[#171717]'>
                 02
               </span>
@@ -196,7 +214,7 @@ export default function Home() {
               </p>
             </article>
 
-            <article className='rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7 sm:col-span-2 lg:col-span-1 transition-colors duration-200 hover:border-[#D4D4D4]'>
+            <article className='rounded-xl border border-[#E8E8E8] bg-white p-6 sm:p-7 sm:col-span-2 lg:col-span-1 h-full'>
               <span className='flex h-11 w-11 items-center justify-center rounded-lg bg-[#F2F2F2] text-sm font-semibold text-[#171717]'>
                 03
               </span>
