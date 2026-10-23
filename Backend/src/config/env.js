@@ -8,9 +8,9 @@ const schema = z
     MONGODB_URI: z.string().min(1, 'MONGODB_URI is required'),
     CORS_ORIGIN: z.string().min(1, 'CORS_ORIGIN is required'),
     ACCESS_TOKEN_SECRET: z.string().min(32, 'must be at least 32 chars'),
-    ACCESS_TOKEN_EXPIRY: z.string().default('15m'),
+    ACCESS_TOKEN_EXPIRY: z.string().regex(/^\d+[smhd]$/, 'use e.g. 15m, 12h, 7d').default('15m'),
     REFRESH_TOKEN_SECRET: z.string().min(32, 'must be at least 32 chars'),
-    REFRESH_TOKEN_EXPIRY: z.string().default('7d'),
+    REFRESH_TOKEN_EXPIRY: z.string().regex(/^\d+[smhd]$/, 'use e.g. 15m, 12h, 7d').default('7d'),
   })
   .refine((e) => e.ACCESS_TOKEN_SECRET !== e.REFRESH_TOKEN_SECRET, {
     message: 'ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET must differ',
