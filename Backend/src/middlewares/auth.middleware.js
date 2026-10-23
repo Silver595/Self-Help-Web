@@ -1,35 +1,36 @@
-import { ApiError } from '../utils/ApiError.js';
-import asyncHandler from '../utils/asyncHandler.js';
-import jwt, { decode } from 'jsonwebtoken';
-import {User} from '../models/user.model.js';
+import { ApiError } from "../utils/ApiError.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import jwt, { decode } from "jsonwebtoken";
+import { User } from "../models/user.model.js";
+import { Session } from "../models/session.model.js"
+import { env } from "../config/env.js"
 
+// now no need to create cookie with each refresh now the session can handle it
 
-//  This function is used to verify the JWT token sent by the client in the request headers or cookies. It checks if the token is valid and if the user associated with the token exists in the database. If everything is valid, it attaches the user object to the request object and calls the next middleware function. If there is any error, it throws an ApiError with a 401 status code.
-export const verifyJWT = asyncHandler(async (req, _, next) => {
-  // We either get cookies from the web or on mobile phone we get the cookies from the mobile phone which looks something like this "Bearer: <Token>"
+export const verifyJWT = asyncHandler(async (req, _res, next) => {
+  const token = req.cookies?.accessToken ||
+    req.header('Authorization')?.replace('Bearer ', '');
+
+  if (!token) throw new ApiError(401, 'Unauthorized request');
+
+  let decoded;
   try {
-    const token =
-      req.cookies?.accessToken ||
-      req.header('Authorization')?.replace('Bearer ', '');
-
-    if (!token) {
-      throw new ApiError(401, 'Unauthorized request');
-    }
-
-    const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
-    const user = await User.findById(decodedToken?._id).select(
-      '-password -refreshToken',
-    );
-
-    if (!user) {
-      throw new ApiError(401, 'Invalid Access Token');
-    }
-
-    req.user = user;
-    next();
-    
-  } catch (error) {
-    throw new ApiError(401, error?.message || 'Invalid Access Token');
+    decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET, {algorithms:["HS256"]})
+  } catch {
+    throw new ApiError(401,'Invalid or expired access token')
   }
+  if (!decoded.sid) throw new ApiError(401, 'Invalid access token');
+
+  const [user, sessionAlive] = await Promise.all([
+    User.findById(decoded._id).select('-password'),
+    Session.exists({ _id: decoded.sid, user: decoded._id }),
+  ]);
+  if (!user || !sessionAlive) {
+    throw new ApiError(401,'session Expired. Please login again')
+  }
+
+  req.user = user;
+  req.sessionId = decoded.sid;
+  next();
+
 });
