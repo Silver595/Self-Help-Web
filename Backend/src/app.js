@@ -8,19 +8,19 @@ const app = express();
 
 // bro! the below health check section is for CI that we need to implement later on
 
-app.get("/ready", (_req, res) => {
+app.get("/health", (_req, res) => {
   res.status(200).json({
     status: "ok",
     uptime: process.uptime(),
   });
 });
 
-app.get("ready", (_req, res) => {
+app.get("/ready", (_req, res) => {
   // this is for readiness : for checks the MongoDB connection
-  const dbConnections = mongoose.connection.readyState === 1;
-  res.status(dbConnections ? 200 : 503).json({
-    status: dbConnections ? "ready" : "not_ready",
-    db: dbConnections ? "up" : "down",
+  const dbUp = mongoose.connection.readyState === 1;
+  res.status(dbUp ? 200 : 503).json({
+    status: dbUp ? "ready" : "not_ready",
+    db: dbUp ? "up" : "down",
   });
 });
 
