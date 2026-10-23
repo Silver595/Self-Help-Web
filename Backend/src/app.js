@@ -1,4 +1,5 @@
 // Where you create and configure the Express app: middleware setup (cors, express.json(), cookieParser), and mounting your routes. It only configures the app and does not start the server.
+import { env } from './config/env.js';
 import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
@@ -26,8 +27,8 @@ app.get("/ready", (_req, res) => {
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
+    origin: env.CORS_ORIGIN.split(','),
+    credentials: false,
   }),
 );
 
