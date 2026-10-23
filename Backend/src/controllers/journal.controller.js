@@ -1,4 +1,5 @@
-import  asyncHandler  from '../utils/asyncHandler.js';
+import mongoose from 'mongoose';
+import asyncHandler from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Journal } from '../models/journal.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';

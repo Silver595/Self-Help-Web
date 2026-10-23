@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
+import { ApiError } from "./utils/ApiError.js";
 const app = express();
 
 // bro! the below health check section is for CI that we need to implement later on
@@ -70,5 +70,27 @@ app.use("/api/v1/notes", noteRouter);
 import journalRouter from "./routes/journal.routes.js";
 
 app.use("/api/v1/journals", journalRouter);
+
+app.use((req, _res, next) => {
+  next(new ApiError(404,
+    `Path not found: ${req.method} ${req.originalUrl}`
+  ))
+})
+
+app.use((err, _req, res, next) => {
+  if (err.code === 11000) {
+    errror = new ApiError(409, 'Duplicate value: This is already exists')
+  }
+
+  const statusCode = err.statusCode || err.status || 500;
+  const Prod = process.env.NODE_ENV === 'production';
+
+  res.status(statusCode).json({
+    statusCode,
+    success: false, message: statusCode === 500 && Prod ? 'Internal Server Error' : err.message,
+    errors:err.errors || [],
+    ...(Prod ? {} : { stack: err.stack }),
+  })
+})
 
 export { app };
