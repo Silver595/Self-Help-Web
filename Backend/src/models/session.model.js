@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const sessionSchema = new Schema(
   {
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    tokenHash: { type: String, required: true }, // I think it generate [SHA-256]/[other] Hash token for Current Referesh token
+    tokenHash: { type: String, required: true }, // it generate [SHA-256] Hash token for Current Referesh token
     userAgent: { type: String, default: 'unknown' },
     ip: { type: String, default: 'unknown' },
     lastUsedAt: { type: Date, default: Date.now },
