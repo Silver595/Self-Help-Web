@@ -79,7 +79,7 @@ app.use((req, _res, next) => {
 
 app.use((err, _req, res, next) => {
   if (err.code === 11000) {
-    errror = new ApiError(409, 'Duplicate value: This is already exists')
+    err = new ApiError(409, 'Duplicate value: already exists')
   }
 
   const statusCode = err.statusCode || err.status || 500;
