@@ -1,13 +1,18 @@
-// Models define the shape of your data using Mongoose schemas, for example a User with a username, email, and password. A model is also your interface to the database: User.create(), User.findOne(), and so on. Controllers use models to read and write data, so controllers never need to know how the database works internally.
 
+import crypto from 'node:crypto';
+import { env } from '../config/env.js';
 import mongoose, { Schema } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 const BCRYPT_ROUNDS = 12;
-// A real bcrypt hash of a throway string, created once at start up
-// to keep login timnig identical [for email doesnt exist warning/error]
-export const DUMMY_HASH = bcrypt.hashSync('not-a-real-password'.BCRYPT_ROUNDS)
+
+// A real bcrypt hash of a throwaway string, created once at startup
+// to keep login timing similar when an email does not exist.
+export const DUMMY_HASH = bcrypt.hashSync(
+  'not-a-real-password',
+  BCRYPT_ROUNDS
+);
 
 const userSchema = new Schema(
   {
@@ -35,48 +40,54 @@ const userSchema = new Schema(
       type: String,
       required: [true, 'Password is needed'],
     },
-    refreshToken: {
-      type: String,
-    },
+    // refreshToken removed: refresh tokens will be managed by sessions.
   },
   {
     timestamps: true,
   },
 );
 
-// This export User can directy contact with mongoose database
+// Hash the password before saving the user.
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
 
   this.password = await bcrypt.hash(this.password, BCRYPT_ROUNDS);
 });
 
-// This is a custom methods
+// Check whether the provided password is correct.
 userSchema.methods.isPasswordCorrect = async function (password) {
-  return await bcrypt.compare(password, this.password);
+  return bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateAccessToken = function () {
+// Generate a short-lived access token.
+userSchema.methods.generateAccessToken = function (sessionId) {
   return jwt.sign(
-    // Payload
     {
       _id: this._id,
-      email: this.email,
-      username: this.username,
-      fullname: this.fullname,
+      sid: sessionId,
     },
-    // access token
-    process.env.ACCESS_TOKEN_SECRET,
+    env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+      expiresIn: env.ACCESS_TOKEN_EXPIRY,
+      algorithm: 'HS256',
     },
   );
 };
 
-userSchema.methods.generateRefreshToken = function () {
-  return jwt.sign({ _id: this._id }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-  });
+// Generate a unique refresh token for a particular session.
+userSchema.methods.generateRefreshToken = function (sessionId) {
+  return jwt.sign(
+    {
+      _id: this._id,
+      sid: sessionId,
+      jti: crypto.randomUUID(),
+    },
+    env.REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: env.REFRESH_TOKEN_EXPIRY,
+      algorithm: 'HS256',
+    },
+  );
 };
 
 export const User = mongoose.model('User', userSchema);
