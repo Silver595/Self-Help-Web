@@ -1,3 +1,5 @@
+import bcrypt from 'bcrypt';
+import { User, DUMMY_HASH } from '../models/user.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { User } from '../models/user.model.js';
@@ -11,7 +13,7 @@ import {
 } from '../validators/auth.validator.js';
 
 const generateAccessAndRefreshTokens = async (userId) => {
-  
+
   try {
     const user = await User.findById(userId);
     const refreshToken = user.generateRefreshToken();
@@ -27,7 +29,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  
+
   const result = registerSchema.safeParse(req.body);
 
   if (!result.success) {
@@ -72,6 +74,9 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, createdUser, 'User Registered successfully!'));
 });
 
+
+//login section
+
 const loginUser = asyncHandler(async (req, res) => {
   const result = loginSchema.safeParse(req.body);
 
@@ -81,41 +86,32 @@ const loginUser = asyncHandler(async (req, res) => {
       result.error.issues[0].message || 'Invalid request data',
     );
   }
-
   // Destructure email and password from the request body
   const { email, password } = result.data;
-
- 
-
   // Find the user using email field
   const user = await User.findOne({ email });
+  // Always run one bcrypt comparison, even if the user doesn't exist,
+  // so response time doesn't reveal whether the email is registered.
+  const hashToCheck = user ? user.password : DUMMY_HASH;
+  const passwordMatches = await bcrypt.compare(password, hashToCheck);
 
-  // If user dont exist we throw an error
-  if (!user) {
-    throw new ApiError(404, 'User not found');
+  // One message and one status for both failure cases
+  if (!user || !passwordMatches) {
+    throw new ApiError(401, 'Invalid email or password');
   }
-  // We check if password provided is correct or not
-  const isPasswordCorrect = await user.isPasswordCorrect(password);
 
-  // If not we throw an error
-  if (!isPasswordCorrect) {
-    throw new ApiError(401, 'Invalid user credentials');
-  }
   // generate access and refresh tokens for the user
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
     user._id,
   );
-
   const loggedInUser = await User.findById(user._id).select(
     '-password -refreshToken',
   );
-
   // options are provided so that we dont modify cookies in frontend
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
   };
-
   return res
     .status(200)
     .cookie('accessToken', accessToken, options)
@@ -128,6 +124,8 @@ const loginUser = asyncHandler(async (req, res) => {
       ),
     );
 });
+
+// logout section
 
 const logoutUser = asyncHandler(async (req, res) => {
   // Finding the user by ID and unSetting the user

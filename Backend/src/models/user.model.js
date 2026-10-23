@@ -4,6 +4,11 @@ import mongoose, { Schema } from 'mongoose';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
+const BCRYPT_ROUNDS = 12;
+// A real bcrypt hash of a throway string, created once at start up
+// to keep login timnig identical [for email doesnt exist warning/error]
+export const DUMMY_HASH = bcrypt.hashSync('not-a-real-password'.BCRYPT_ROUNDS)
+
 const userSchema = new Schema(
   {
     username: {
@@ -43,7 +48,7 @@ const userSchema = new Schema(
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
 
-  this.password = await bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, BCRYPT_ROUNDS);
 });
 
 // This is a custom methods
