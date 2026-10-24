@@ -57,7 +57,7 @@ app.use("/api/v1/users", userRouter);
 
 import resourceRouter from "./routes/resource.routes.js";
 
-// Mount under your API version prefix
+// Mount under your API version prefix00000
 app.use("/api/v1/resources", resourceRouter);
 
 import habitRouter from "./routes/habit.routes.js";

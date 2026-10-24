@@ -3,20 +3,37 @@ import { verifyJWT } from '../middlewares/auth.middleware.js';
 import {
   createHabit,
   getHabits,
-  toggleHabit,
+  getTodayHabits,
+  getHabit,
+  updateHabit,
+  archiveHabit,
+  unarchiveHabit,
   deleteHabit,
+  setHabitLog,
+  deleteHabitLog,
+  getHabitStats,
 } from '../controllers/habit.controller.js';
 
 const router = Router();
 
-// Apply auth middleware to all routes
+// Every habit route requires a logged-in user
 router.use(verifyJWT);
 
-// Base route: /api/v1/habits
+// Mounted in app.js as: app.use('/api/v1/habits', habitRouter)
+
+// Collection
 router.route('/').post(createHabit).get(getHabits);
 
-// Action routes
-router.route('/:id/toggle').patch(toggleHabit);
-router.route('/:id').delete(deleteHabit);
+// Must come BEFORE '/:id', otherwise Express treats "today" as an id
+router.route('/today').get(getTodayHabits);
+
+// Single habit
+router.route('/:id').get(getHabit).patch(updateHabit).delete(deleteHabit);
+router.route('/:id/archive').patch(archiveHabit);
+router.route('/:id/unarchive').patch(unarchiveHabit);
+router.route('/:id/stats').get(getHabitStats);
+
+// History: PUT is idempotent, so sending it twice gives the same result
+router.route('/:id/logs/:date').put(setHabitLog).delete(deleteHabitLog);
 
 export default router;
