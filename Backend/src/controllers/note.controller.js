@@ -1,15 +1,25 @@
-import mongoose from 'mongoose';
 import asyncHandler from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { Note } from '../models/note.model.js';
+import { Resource } from '../models/resource.model.js';
+import { Habit } from '../models/habit.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 
-// 1. Create a new note (can be standalone or linked to a resource/habit)
 const createNote = asyncHandler(async (req, res) => {
   const { title, content, resourceId, habitId } = req.body;
 
-  if (!content) {
-    throw new ApiError(400, 'Note content is required');
+  if (resourceId && !(await Resource.exists({
+    _id: resourceId,
+    user: req.user._id,
+  }))) {
+    throw new ApiError(404, 'Resource not found');
+  }
+
+  if (habitId && !(await Habit.exists({
+    _id: habitId,
+    user: req.user._id,
+  }))) {
+    throw new ApiError(404, 'Habit not found');
   }
 
   const note = await Note.create({
@@ -17,7 +27,7 @@ const createNote = asyncHandler(async (req, res) => {
     content,
     resource: resourceId || undefined,
     habit: habitId || undefined,
-    user: req.user._id, // Injected by verifyJWT
+    user: req.user._id,
   });
 
   return res
@@ -25,39 +35,56 @@ const createNote = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, note, 'Note created successfully'));
 });
 
-// 2. Get notes (supports filtering by resourceId or habitId via query params)
 const getNotes = asyncHandler(async (req, res) => {
-  const { resourceId, habitId } = req.query;
-
+  const { resourceId, habitId, page, limit } = req.validQuery;
   const filter = { user: req.user._id };
+
   if (resourceId) filter.resource = resourceId;
   if (habitId) filter.habit = habitId;
 
-  const notes = await Note.find(filter).sort({ createdAt: -1 });
+  const [notes, totalNotes] = await Promise.all([
+    Note.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    Note.countDocuments(filter),
+  ]);
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, notes, 'Notes fetched successfully'));
+  return res.status(200).json(
+    new ApiResponse(200, {
+      notes,
+      totalPages: Math.ceil(totalNotes / limit),
+      currentPage: page,
+      totalNotes,
+    }, 'Notes fetched successfully'),
+  );
 });
 
-// 3. Update an existing note
 const updateNote = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  // Bug Fix: Prevent 500 CastError crash on malformed IDs
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new ApiError(400, 'Invalid Resource ID format');
+  const { resourceId, habitId, ...updates } = req.body;
+
+  if (resourceId && !(await Resource.exists({
+    _id: resourceId,
+    user: req.user._id,
+  }))) {
+    throw new ApiError(404, 'Resource not found');
   }
-  const { title, content } = req.body;
+
+  if (habitId && !(await Habit.exists({
+    _id: habitId,
+    user: req.user._id,
+  }))) {
+    throw new ApiError(404, 'Habit not found');
+  }
+
+  if (resourceId !== undefined) updates.resource = resourceId;
+  if (habitId !== undefined) updates.habit = habitId;
 
   const note = await Note.findOneAndUpdate(
     { _id: id, user: req.user._id },
-    {
-      $set: {
-        title,
-        content,
-      },
-    },
-    { new: true, runValidators: true }
+    { $set: updates },
+    { new: true, runValidators: true },
   );
 
   if (!note) {
@@ -69,15 +96,11 @@ const updateNote = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, note, 'Note updated successfully'));
 });
 
-// 4. Delete a note
 const deleteNote = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  // Bug Fix: Prevent 500 CastError crash on malformed IDs
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new ApiError(400, 'Invalid Resource ID format');
-  }
-
-  const note = await Note.findOneAndDelete({ _id: id, user: req.user._id });
+  const note = await Note.findOneAndDelete({
+    _id: req.params.id,
+    user: req.user._id,
+  });
 
   if (!note) {
     throw new ApiError(404, 'Note not found or unauthorized');
