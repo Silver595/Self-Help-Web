@@ -1,84 +1,151 @@
-import mongoose from 'mongoose';
 import asyncHandler from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
-import { Habit } from '../models/habit.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import { Habit } from '../models/habit.model.js';
+import {
+  findOwnedHabit,
+  logProgress,
+  removeLog,
+  getDueToday,
+  getStats,
+  deleteWithHistory,
+} from '../services/habit.service.js';
+import {
+  createHabitSchema,
+  updateHabitSchema,
+  logSchema,
+  statsQuerySchema,
+  listQuerySchema,
+} from '../validators/habit.validator.js';
 
-// 1. Create a new habit
-const createHabit = asyncHandler(async (req, res) => {
-  const { title, frequency } = req.body;
-
-  if (!title) {
-    throw new ApiError(400, 'Habit title is required');
+// Validate with Zod and return the clean data, or throw a 400
+const parse = (schema, data) => {
+  const result = schema.safeParse(data ?? {});
+  if (!result.success) {
+    throw new ApiError(400, result.error.issues[0]?.message || 'Invalid request data');
   }
+  return result.data;
+};
 
-  const habit = await Habit.create({
-    title,
-    frequency: frequency || 'Daily',
-    user: req.user._id, // Injected by verifyJWT
-  });
+// Turn database errors into clean API errors
+const rethrowWriteError = (error) => {
+  if (error?.code === 11000) {
+    throw new ApiError(409, 'You already have a habit with this title');
+  }
+  if (error?.name === 'ValidationError') {
+    const first = Object.values(error.errors)[0];
+    throw new ApiError(400, first?.message || 'Invalid habit data');
+  }
+  throw error;
+};
 
-  return res
-    .status(201)
-    .json(new ApiResponse(201, habit, 'Habit created successfully'));
+const NESTED_FIELDS = ['schedule', 'target', 'reminder'];
+
+export const createHabit = asyncHandler(async (req, res) => {
+  const data = parse(createHabitSchema, req.body);
+
+  try {
+    const habit = await Habit.create({ ...data, user: req.user._id });
+    return res.status(201).json(new ApiResponse(201, habit, 'Habit created successfully'));
+  } catch (error) {
+    rethrowWriteError(error);
+  }
 });
 
-// 2. Get all habits for the logged-in user
-const getHabits = asyncHandler(async (req, res) => {
-  const habits = await Habit.find({ user: req.user._id }).sort({
-    createdAt: -1,
-  });
+export const getHabits = asyncHandler(async (req, res) => {
+  const { tag, archived } = parse(listQuerySchema, req.query);
+
+  const filter = { user: req.user._id, isArchived: archived === 'true' };
+  if (tag) filter.tags = tag;
+
+  const habits = await Habit.find(filter).sort({ createdAt: 1 });
+
+  // Cached streaks go stale after a missed day, so refresh them when listing
+  await Promise.all(habits.map((habit) => habit.recalculateStreaks()));
+
+  return res.status(200).json(new ApiResponse(200, habits, 'Habits fetched successfully'));
+});
+
+export const getTodayHabits = asyncHandler(async (req, res) => {
+  const due = await getDueToday(req.user._id);
+  return res.status(200).json(new ApiResponse(200, due, "Today's habits fetched successfully"));
+});
+
+export const getHabit = asyncHandler(async (req, res) => {
+  const habit = await findOwnedHabit(req.params.id, req.user._id);
+  await habit.recalculateStreaks();
+  return res.status(200).json(new ApiResponse(200, habit, 'Habit fetched successfully'));
+});
+
+export const updateHabit = asyncHandler(async (req, res) => {
+  const data = parse(updateHabitSchema, req.body);
+  if (Object.keys(data).length === 0) throw new ApiError(400, 'Nothing to update');
+
+  const habit = await findOwnedHabit(req.params.id, req.user._id);
+
+  // Set nested fields one key at a time so a partial update
+  // (e.g. only schedule.type) doesn't wipe the sibling keys
+  for (const [key, value] of Object.entries(data)) {
+    if (NESTED_FIELDS.includes(key)) {
+      for (const [innerKey, innerValue] of Object.entries(value)) {
+        habit.set(`${key}.${innerKey}`, innerValue);
+      }
+    } else {
+      habit.set(key, value);
+    }
+  }
+
+  try {
+    await habit.save();
+  } catch (error) {
+    rethrowWriteError(error);
+  }
+
+  // Schedule, target and dates all affect streaks
+  await habit.recalculateStreaks();
+
+  return res.status(200).json(new ApiResponse(200, habit, 'Habit updated successfully'));
+});
+
+export const archiveHabit = asyncHandler(async (req, res) => {
+  const habit = await findOwnedHabit(req.params.id, req.user._id);
+  await habit.archive();
+  return res.status(200).json(new ApiResponse(200, habit, 'Habit archived'));
+});
+
+export const unarchiveHabit = asyncHandler(async (req, res) => {
+  const habit = await findOwnedHabit(req.params.id, req.user._id);
+  await habit.unarchive();
+  return res.status(200).json(new ApiResponse(200, habit, 'Habit restored'));
+});
+
+export const deleteHabit = asyncHandler(async (req, res) => {
+  await deleteWithHistory(req.params.id, req.user._id);
+  return res.status(200).json(new ApiResponse(200, {}, 'Habit and its history deleted'));
+});
+
+export const setHabitLog = asyncHandler(async (req, res) => {
+  const { value, note } = parse(logSchema, req.body);
+  const { habit, log, completed } = await logProgress(
+    req.params.id,
+    req.user._id,
+    req.params.date,
+    value,
+    note,
+  );
 
   return res
     .status(200)
-    .json(new ApiResponse(200, habits, 'Habits fetched successfully'));
+    .json(new ApiResponse(200, { habit, log, completed }, 'Progress saved'));
 });
 
-// 3. Toggle a habit completion for a specific date
-const toggleHabit = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  // Bug Fix: Prevent 500 CastError crash on malformed IDs
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new ApiError(400, 'Invalid Resource ID format');
-  }
-
-  const { date } = req.body; // Expected format: "YYYY-MM-DD"
-
-  if (!date) {
-    throw new ApiError(400, 'Date is required for tracking habits');
-  }
-
-  const habit = await Habit.findOne({ _id: id, user: req.user._id });
-
-  if (!habit) {
-    throw new ApiError(404, 'Habit not found or unauthorized');
-  }
-
-  // Call the custom schema method we defined in the model
-  await habit.toggleDate(date);
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, habit, 'Habit status updated successfully'));
+export const deleteHabitLog = asyncHandler(async (req, res) => {
+  const habit = await removeLog(req.params.id, req.user._id, req.params.date);
+  return res.status(200).json(new ApiResponse(200, habit, 'Log removed'));
 });
 
-// 4. Delete a habit
-const deleteHabit = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  // Bug Fix: Prevent 500 CastError crash on malformed IDs
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new ApiError(400, 'Invalid Resource ID format');
-  }
-
-  const habit = await Habit.findOneAndDelete({ _id: id, user: req.user._id });
-
-  if (!habit) {
-    throw new ApiError(404, 'Habit not found or unauthorized');
-  }
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, {}, 'Habit deleted successfully'));
+export const getHabitStats = asyncHandler(async (req, res) => {
+  const { from, to } = parse(statsQuerySchema, req.query);
+  const stats = await getStats(req.params.id, req.user._id, from, to);
+  return res.status(200).json(new ApiResponse(200, stats, 'Stats fetched successfully'));
 });
-
-export { createHabit, getHabits, toggleHabit, deleteHabit };
