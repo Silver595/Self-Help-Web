@@ -11,13 +11,18 @@ import {
   getSessions,
   revokeSession
 } from '../controllers/user.controller.js';
+import { registerLimiter,loginLimiter,refreshLimiter } from '../middlewares/rateLimit.middleware.js';
+import { validateObjectIdParam } from '../middlewares/validateObjectId.middleware.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
 const router = Router();
-// Unsecured Routes
-router.route('/register').post(registerUser);
-router.route('/login').post(loginUser);
-router.route('/refresh-token').post(refreshAccessToken);
+
+router.param('id', validateObjectIdParam);
+
+// secured Routes
+router.route('/register').post(registerLimiter,registerUser);
+router.route('/login').post(loginLimiter,loginUser);
+router.route('/refresh-token').post(refreshLimiter,refreshAccessToken);
 
 router.route('/logout-all').post(verifyJWT, logoutAll);
 router.route('/sessions').get(verifyJWT, getSessions);

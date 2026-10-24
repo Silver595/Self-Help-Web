@@ -5,7 +5,18 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { ApiError } from "./utils/ApiError.js";
+import helmet from 'helmet';
+import morgan from 'morgan';
+import { apiLimiter } from './middlewares/rateLimit.middleware.js';
+
 const app = express();
+
+app.use(helmet());
+app.use(
+  morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev', {
+    skip: (req) => res.path == '/health' || req.path == '/ready',
+  })
+)
 
 // bro! the below health check section is for CI that we need to implement later on
 
@@ -47,7 +58,7 @@ app.use(
 app.use(express.static("public"));
 
 app.use(cookieParser());
-
+app.use('/api', apiLimiter);
 // Routes
 import userRouter from "./routes/user.routes.js";
 

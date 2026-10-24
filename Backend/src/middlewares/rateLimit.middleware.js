@@ -15,6 +15,7 @@ const make = (options) =>
 export const apiLimiter = make({ windowMs: 15 * 60 * 1000, limit: 300 });
 
 // Only FAILED logins count: 10 wrong passwords per IP per 15 min
+// It might against DOS attack
 export const loginLimiter = make({
   windowMs: 15 * 60 * 1000,
   limit: 10,
