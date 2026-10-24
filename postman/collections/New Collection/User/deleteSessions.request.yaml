@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{server}}users/sessions/6adc5250435ea90de0805b24"
+method: DELETE
+order: 6000

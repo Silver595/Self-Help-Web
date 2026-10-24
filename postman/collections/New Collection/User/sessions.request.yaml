@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{server}}users/sessions"
+method: GET
+order: 5000

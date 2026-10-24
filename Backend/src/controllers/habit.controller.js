@@ -22,7 +22,10 @@ import {
 const parse = (schema, data) => {
   const result = schema.safeParse(data ?? {});
   if (!result.success) {
-    throw new ApiError(400, result.error.issues[0]?.message || 'Invalid request data');
+    throw new ApiError(
+      400,
+      result.error.issues[0]?.message || 'Invalid request data',
+    );
   }
   return result.data;
 };
@@ -43,10 +46,21 @@ const NESTED_FIELDS = ['schedule', 'target', 'reminder'];
 
 export const createHabit = asyncHandler(async (req, res) => {
   const data = parse(createHabitSchema, req.body);
+  // Check for duplicate habit title for this user
+  const existingHabit = await Habit.findOne({
+    user: req.user._id,
+    title: data.title,
+  });
+
+  if (existingHabit) {
+    throw new ApiError(409, 'You already have a habit with this title');
+  }
 
   try {
     const habit = await Habit.create({ ...data, user: req.user._id });
-    return res.status(201).json(new ApiResponse(201, habit, 'Habit created successfully'));
+    return res
+      .status(201)
+      .json(new ApiResponse(201, habit, 'Habit created successfully'));
   } catch (error) {
     rethrowWriteError(error);
   }
@@ -63,23 +77,30 @@ export const getHabits = asyncHandler(async (req, res) => {
   // Cached streaks go stale after a missed day, so refresh them when listing
   await Promise.all(habits.map((habit) => habit.recalculateStreaks()));
 
-  return res.status(200).json(new ApiResponse(200, habits, 'Habits fetched successfully'));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, habits, 'Habits fetched successfully'));
 });
 
 export const getTodayHabits = asyncHandler(async (req, res) => {
   const due = await getDueToday(req.user._id);
-  return res.status(200).json(new ApiResponse(200, due, "Today's habits fetched successfully"));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, due, "Today's habits fetched successfully"));
 });
 
 export const getHabit = asyncHandler(async (req, res) => {
   const habit = await findOwnedHabit(req.params.id, req.user._id);
   await habit.recalculateStreaks();
-  return res.status(200).json(new ApiResponse(200, habit, 'Habit fetched successfully'));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, habit, 'Habit fetched successfully'));
 });
 
 export const updateHabit = asyncHandler(async (req, res) => {
   const data = parse(updateHabitSchema, req.body);
-  if (Object.keys(data).length === 0) throw new ApiError(400, 'Nothing to update');
+  if (Object.keys(data).length === 0)
+    throw new ApiError(400, 'Nothing to update');
 
   const habit = await findOwnedHabit(req.params.id, req.user._id);
 
@@ -104,7 +125,9 @@ export const updateHabit = asyncHandler(async (req, res) => {
   // Schedule, target and dates all affect streaks
   await habit.recalculateStreaks();
 
-  return res.status(200).json(new ApiResponse(200, habit, 'Habit updated successfully'));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, habit, 'Habit updated successfully'));
 });
 
 export const archiveHabit = asyncHandler(async (req, res) => {
@@ -121,7 +144,9 @@ export const unarchiveHabit = asyncHandler(async (req, res) => {
 
 export const deleteHabit = asyncHandler(async (req, res) => {
   await deleteWithHistory(req.params.id, req.user._id);
-  return res.status(200).json(new ApiResponse(200, {}, 'Habit and its history deleted'));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, 'Habit and its history deleted'));
 });
 
 export const setHabitLog = asyncHandler(async (req, res) => {
@@ -147,5 +172,7 @@ export const deleteHabitLog = asyncHandler(async (req, res) => {
 export const getHabitStats = asyncHandler(async (req, res) => {
   const { from, to } = parse(statsQuerySchema, req.query);
   const stats = await getStats(req.params.id, req.user._id, from, to);
-  return res.status(200).json(new ApiResponse(200, stats, 'Stats fetched successfully'));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, stats, 'Stats fetched successfully'));
 });
