@@ -1,5 +1,12 @@
 import { Router } from 'express';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { validate } from '../middlewares/validate.middleware.js';
+import { validateObjectIdParam } from '../middlewares/validateObjectId.middleware.js';
+import {
+  createNoteSchema,
+  noteQuerySchema,
+  updateNoteSchema,
+} from '../validators/note.validator.js';
 import {
   createNote,
   getNotes,
@@ -9,13 +16,17 @@ import {
 
 const router = Router();
 
-// Apply auth middleware to all note routes
 router.use(verifyJWT);
+router.param('id', validateObjectIdParam);
 
-// Base route: /api/v1/notes (GET supports query filters like ?resourceId=... or ?habitId=...)
-router.route('/').post(createNote).get(getNotes);
+router
+  .route('/')
+  .post(validate(createNoteSchema), createNote)
+  .get(validate(noteQuerySchema, 'query'), getNotes);
 
-// Modify route: /api/v1/notes/:id
-router.route('/:id').patch(updateNote).delete(deleteNote);
+router
+  .route('/:id')
+  .patch(validate(updateNoteSchema), updateNote)
+  .delete(deleteNote);
 
 export default router;

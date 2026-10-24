@@ -1,5 +1,12 @@
 import { Router } from 'express';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { validate } from '../middlewares/validate.middleware.js';
+import { validateObjectIdParam } from '../middlewares/validateObjectId.middleware.js';
+import {
+  createResourceSchema,
+  resourceQuerySchema,
+  updateResourceSchema,
+} from '../validators/resource.validator.js';
 import {
   createResource,
   getResources,
@@ -9,13 +16,17 @@ import {
 
 const router = Router();
 
-// Apply verifyJWT middleware to all routes in this file (Secured)
 router.use(verifyJWT);
+router.param('id', validateObjectIdParam);
 
-// Base route: /api/v1/resources
-router.route('/').post(createResource).get(getResources);
+router
+  .route('/')
+  .post(validate(createResourceSchema), createResource)
+  .get(validate(resourceQuerySchema, 'query'), getResources);
 
-// Dynamic ID route: /api/v1/resources/:id
-router.route('/:id').patch(updateResource).delete(deleteResource);
+router
+  .route('/:id')
+  .patch(validate(updateResourceSchema), updateResource)
+  .delete(deleteResource);
 
 export default router;

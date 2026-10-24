@@ -1,5 +1,12 @@
 import { Router } from 'express';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { validate } from '../middlewares/validate.middleware.js';
+import { validateObjectIdParam } from '../middlewares/validateObjectId.middleware.js';
+import {
+  createJournalSchema,
+  journalQuerySchema,
+  updateJournalSchema,
+} from '../validators/journal.validator.js';
 import {
   createJournal,
   getJournals,
@@ -9,13 +16,17 @@ import {
 
 const router = Router();
 
-// Apply auth middleware to all journal routes
 router.use(verifyJWT);
+router.param('id', validateObjectIdParam);
 
-// Base route: /api/v1/journals
-router.route('/').post(createJournal).get(getJournals);
+router
+  .route('/')
+  .post(validate(createJournalSchema), createJournal)
+  .get(validate(journalQuerySchema, 'query'), getJournals);
 
-// Modify route: /api/v1/journals/:id
-router.route('/:id').patch(updateJournal).delete(deleteJournal);
+router
+  .route('/:id')
+  .patch(validate(updateJournalSchema), updateJournal)
+  .delete(deleteJournal);
 
 export default router;

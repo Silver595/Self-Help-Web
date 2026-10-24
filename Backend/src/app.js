@@ -14,7 +14,7 @@ const app = express();
 app.use(helmet());
 app.use(
   morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev', {
-    skip: (req) => res.path == '/health' || req.path == '/ready',
+    skip: (req) => req.path === '/health' || req.path === '/ready',
   })
 )
 
