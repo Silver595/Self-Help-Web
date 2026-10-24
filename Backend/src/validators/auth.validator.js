@@ -5,9 +5,16 @@ const fullnameSchema = z
   .min(2, 'Name is too short')
   .regex(/^[A-Za-z ]+$/, 'Full name can only contain letters');
 const emailSchema = z.email('Invalid email');
+
+
 const passwordSchema = z
-  .string()
-  .min(6, 'Password must be at least 6 characters');
+  .string({ error: 'password is required' })
+  .min(8, 'Password must be at least 8 characters')
+  .max(72,'Password at most be 72 characters')
+  .regex(/[A-Za-z]/,'Password must contain a letter')
+  .regex(/\d/,'Password must contain a number')
+  .regex(/[^A-Za-z0-9]/, 'Password must contain a special character')
+  .regex(/^\S*$/, 'Password must not contain whitespace'); //fdeeAD443@!
 
 const usernameSchema = z
   .string()
