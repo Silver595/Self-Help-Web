@@ -19,6 +19,7 @@ const habitSchema = new Schema(
     title: {
       type: String,
       required: [true, 'Title is required'],
+      lowercase: true,
       trim: true,
       maxlength: [80, 'Title can be at most 80 characters'],
     },

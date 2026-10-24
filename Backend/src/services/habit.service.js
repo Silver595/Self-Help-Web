@@ -1,18 +1,20 @@
 import mongoose from 'mongoose';
 import { Habit } from '../models/habit.model.js';
 import { ApiError } from '../utils/ApiError.js';
+import { HabitLog } from '../models/habitLog.model.js';
 import {
   MAX_RANGE_DAYS,
   addDays,
   assertDate,
   dayNumber,
   fromDayNumber,
-} from '../utils/habitDate.js';
+} from '../utils/HabitDate.js';
 
 // Find a habit that belongs to this user, or throw 404.
 // Every other function here goes through it, so ownership is always checked.
 export const findOwnedHabit = async (habitId, userId) => {
-  if (!mongoose.isValidObjectId(habitId)) throw new ApiError(400, 'Invalid habit id');
+  if (!mongoose.isValidObjectId(habitId))
+    throw new ApiError(400, 'Invalid habit id');
   const habit = await Habit.findOne({ _id: habitId, user: userId });
   if (!habit) throw new ApiError(404, 'Habit not found');
   return habit;
@@ -22,13 +24,18 @@ export const findOwnedHabit = async (habitId, userId) => {
 export const logProgress = async (habitId, userId, date, value = 1, note) => {
   assertDate(date);
   if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
-    throw new ApiError(400, 'Value must be a number greater than 0. Use removeLog to undo');
+    throw new ApiError(
+      400,
+      'Value must be a number greater than 0. Use removeLog to undo',
+    );
   }
 
   const habit = await findOwnedHabit(habitId, userId);
 
-  if (habit.isArchived) throw new ApiError(400, 'Cannot log progress on an archived habit');
-  if (date > habit.today()) throw new ApiError(400, 'Cannot log progress for a future date');
+  if (habit.isArchived)
+    throw new ApiError(400, 'Cannot log progress on an archived habit');
+  if (date > habit.today())
+    throw new ApiError(400, 'Cannot log progress for a future date');
   if (!habit.isScheduledOn(date)) {
     throw new ApiError(400, 'This habit is not scheduled on that date');
   }
@@ -37,12 +44,16 @@ export const logProgress = async (habitId, userId, date, value = 1, note) => {
   if (note !== undefined) update.$set.note = note;
 
   // upsert makes find-or-create a single atomic operation, so there is no race
-  const log = await HabitLog.findOneAndUpdate({ habit: habit._id, date }, update, {
-    upsert: true,
-    new: true,
-    runValidators: true,
-    setDefaultsOnInsert: true,
-  });
+  const log = await HabitLog.findOneAndUpdate(
+    { habit: habit._id, date },
+    update,
+    {
+      upsert: true,
+      new: true,
+      runValidators: true,
+      setDefaultsOnInsert: true,
+    },
+  );
 
   await habit.recalculateStreaks();
   return { habit, log, completed: habit.isComplete(log.value) };
@@ -54,7 +65,8 @@ export const removeLog = async (habitId, userId, date) => {
   const habit = await findOwnedHabit(habitId, userId);
 
   const result = await HabitLog.deleteOne({ habit: habit._id, date });
-  if (result.deletedCount === 0) throw new ApiError(404, 'No log found for that date');
+  if (result.deletedCount === 0)
+    throw new ApiError(404, 'No log found for that date');
 
   await habit.recalculateStreaks();
   return habit;
@@ -62,7 +74,9 @@ export const removeLog = async (habitId, userId, date) => {
 
 // The app's main screen: habits scheduled today, with each one's progress
 export const getDueToday = async (userId) => {
-  const habits = await Habit.find({ user: userId, isArchived: false }).sort({ createdAt: 1 });
+  const habits = await Habit.find({ user: userId, isArchived: false }).sort({
+    createdAt: 1,
+  });
 
   // "today" is decided per habit, using that habit's timezone
   const due = habits
@@ -96,7 +110,8 @@ export const getStats = async (habitId, userId, from, to) => {
   const end = to ?? today;
   assertDate(end, 'to');
   const defaultStart = addDays(end, -29);
-  const start = from ?? (defaultStart > habit.startDate ? defaultStart : habit.startDate);
+  const start =
+    from ?? (defaultStart > habit.startDate ? defaultStart : habit.startDate);
   assertDate(start, 'from');
 
   if (start > end) throw new ApiError(400, '"from" cannot be after "to"');
@@ -104,7 +119,10 @@ export const getStats = async (habitId, userId, from, to) => {
     throw new ApiError(400, `Date range cannot exceed ${MAX_RANGE_DAYS} days`);
   }
 
-  const logs = await HabitLog.find({ habit: habit._id, date: { $gte: start, $lte: end } })
+  const logs = await HabitLog.find({
+    habit: habit._id,
+    date: { $gte: start, $lte: end },
+  })
     .select('date value')
     .lean();
   const valueByDate = new Map(logs.map((l) => [l.date, l.value]));
@@ -132,7 +150,9 @@ export const getStats = async (habitId, userId, from, to) => {
     to: end,
     scheduledDays,
     completedDays,
-    completionRate: scheduledDays ? Math.round((completedDays / scheduledDays) * 1000) / 1000 : 0,
+    completionRate: scheduledDays
+      ? Math.round((completedDays / scheduledDays) * 1000) / 1000
+      : 0,
     currentStreak: habit.currentStreak,
     longestStreak: habit.longestStreak,
     days,
