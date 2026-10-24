@@ -6,7 +6,7 @@ const STATUSES = ['Plan to Do', 'In progress', 'Completed'];
 
 export const createResourceSchema = z.object({
   title: z.string({ error: 'Title is required' }).trim().min(1, 'Title is required').max(200),
-  type: z.enum(TYPES, { error: 'Type must be Book, Article or YouTube' }),
+  type: z.enum(TYPES, { error: 'Type must be Book, Article, YouTube or Documentory' }),
   // http(s) only: blocks javascript: links that would become XSS when rendered as href
   link: z
     .url('Invalid link')
