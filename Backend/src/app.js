@@ -101,7 +101,11 @@ app.use((err, _req, res, _next) => {
       field: e.path,
       message: e.message,
     }));
-    error = new ApiError(400, errors[0]?.message || 'Validation failed', errors);
+    error = new ApiError(
+      400,
+      errors[0]?.message || 'Validation failed',
+      errors,
+    );
   } else if (err.name === 'CastError') {
     error = new ApiError(400, 'Invalid value for ' + err.path);
   }
