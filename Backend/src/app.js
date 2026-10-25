@@ -82,6 +82,10 @@ import journalRouter from './routes/journal.routes.js';
 
 app.use('/api/v1/journals', journalRouter);
 
+import dashboardRouter from './routes/dashboard.routes.js';
+
+app.use('/api/v1/dashboard', dashboardRouter);
+
 app.use((req, _res, next) => {
   next(new ApiError(404, `Path not found: ${req.method} ${req.originalUrl}`));
 });
