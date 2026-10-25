@@ -39,4 +39,4 @@ const pdfSchema = new Schema(
 pdfSchema.index({user:1, createdAt: -1}); // Index for user and createdAt for faster queries
 pdfSchema.index({resource:1, createdAt: -1}, {unique:true}); // Unique index for resource to ensure one PDF per resource
 
-const Pdf = mongoose.model('Pdf', pdfSchema);
+export const Pdf = mongoose.model('Pdf', pdfSchema);

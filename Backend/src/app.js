@@ -82,6 +82,12 @@ import journalRouter from './routes/journal.routes.js';
 
 app.use('/api/v1/journals', journalRouter);
 
+// pdf routes
+import { pdfRouter, resourcePdfRouter } from './routes/pdf.routes.js';
+
+app.use('/api/pdfs', pdfRouter);
+app.use('/api/resources/:resourceId/pdf', resourcePdfRouter);
+
 app.use((req, _res, next) => {
   next(new ApiError(404, `Path not found: ${req.method} ${req.originalUrl}`));
 });

@@ -19,7 +19,15 @@ const schema = z
       .string()
       .regex(/^\d+[smhd]$/, 'use e.g. 15m, 12h, 7d')
       .default('7d'),
+
+       // Cloudflare R2 (make these required after Cloudflare setup)
+    R2_ACCOUNT_ID: z.string().optional(),
+    R2_BUCKET_NAME: z.string().optional(),
+    R2_ACCESS_KEY_ID: z.string().optional(),
+    R2_SECRET_ACCESS_KEY: z.string().optional(),
+      
   })
+
   .refine((e) => e.ACCESS_TOKEN_SECRET !== e.REFRESH_TOKEN_SECRET, {
     message: 'ACCESS_TOKEN_SECRET and REFRESH_TOKEN_SECRET must differ',
     path: ['REFRESH_TOKEN_SECRET'],

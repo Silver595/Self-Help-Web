@@ -16,4 +16,4 @@ const upload = multer({
     }
 })
 
-export const uploadPdf = upload.single('file');
+export const uploadPdfFile = upload.single('file');
