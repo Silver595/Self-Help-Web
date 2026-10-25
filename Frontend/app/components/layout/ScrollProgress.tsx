@@ -1,50 +1,64 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function ScrollProgress() {
+  const barRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    const main = document.querySelector('main');
+    const bar = barRef.current;
+
+    if (!main || !bar) return;
+
+    let ticking = false;
+
     const updateProgress = () => {
-      const scrollableElement = document.querySelector('main');
+      if (ticking) return;
 
-      if (!scrollableElement) return;
+      ticking = true;
 
-      const { scrollTop, scrollHeight, clientHeight } =
-        scrollableElement;
+      requestAnimationFrame(() => {
+        const maxScroll = main.scrollHeight - main.clientHeight;
+        const percentage =
+          maxScroll > 0 ? main.scrollTop / maxScroll : 0;
 
-      const maxScroll = scrollHeight - clientHeight;
+        const value = Math.min(1, Math.max(0, percentage));
 
-      const percentage =
-        maxScroll > 0 ? (scrollTop / maxScroll) * 100 : 0;
+        bar.style.transform = `scaleX(${value})`;
+        setProgress(Math.round(value * 100));
 
-      setProgress(Math.min(100, Math.max(0, percentage)));
+        ticking = false;
+      });
     };
-
-    const scrollableElement = document.querySelector('main');
 
     updateProgress();
 
-    scrollableElement?.addEventListener('scroll', updateProgress);
+    main.addEventListener('scroll', updateProgress, {
+      passive: true,
+    });
+
     window.addEventListener('resize', updateProgress);
 
     return () => {
-      scrollableElement?.removeEventListener('scroll', updateProgress);
+      main.removeEventListener('scroll', updateProgress);
       window.removeEventListener('resize', updateProgress);
     };
   }, []);
 
   return (
-    <div className="relative h-[3px] w-full bg-gray-200">
-      {/* Animated progress line */}
+    <div className="relative h-[3px] w-full bg-gray-200/70">
       <div
-        className="h-full bg-[#ff3d00] transition-[width] duration-150 ease-out"
-        style={{ width: `${progress}%` }}
+        ref={barRef}
+        className="absolute inset-0 origin-left bg-[#ff3d00]"
+        style={{
+          transform: 'scaleX(0)',
+          willChange: 'transform',
+        }}
       />
 
-      {/* Percentage */}
-      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-gray-500">
-        {Math.round(progress)}%
+      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono leading-none text-gray-500">
+        {progress}%
       </span>
     </div>
   );
