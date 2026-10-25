@@ -1,10 +1,17 @@
 import { z } from 'zod';
 
 const fullnameSchema = z
-  .string()
+  .string({ error: 'Full name is required' })
+  .trim()
   .min(2, 'Name is too short')
-  .regex(/^[A-Za-z ]+$/, 'Full name can only contain letters');
-const emailSchema = z.email('Invalid email');
+  .max(60, 'Name is too long')
+  // letters of any language, plus space . ' -   (Anne-Marie, O'Neil, A. Kumar)
+  .regex(/^\p{L}[\p{L} .'-]*$/u, 'Name contains invalid characters');
+const emailSchema = z
+  .string({ error: 'Email is required' })
+  .trim()
+  .toLowerCase()
+  .pipe(z.email('Invalid email'));
 
 const passwordSchema = z
   .string({ error: 'password is required' })
@@ -16,8 +23,10 @@ const passwordSchema = z
   .regex(/^\S*$/, 'Password must not contain whitespace'); //fdeeAD443@!
 
 const usernameSchema = z
-  .string()
+  .string({ error: 'Username is required' })
+  .trim()
   .min(3, 'Username must be at least 3 characters long')
+  .max(30, 'Username must be at most 30 characters long')
   .regex(
     /^[a-zA-Z0-9_\.]+$/,
     'Username can only contain alphanumeric characters, underscores, and periods',
@@ -41,7 +50,7 @@ const updateFullNameSchema = z.object({
 });
 
 const updatePasswordSchema = z.object({
-  oldPassword: passwordSchema,
+  oldPassword: z.string().min(1, 'Old password is required'),
   newPassword: passwordSchema,
 });
 
