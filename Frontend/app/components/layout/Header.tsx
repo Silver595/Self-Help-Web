@@ -1,8 +1,18 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router/internal/react-server-client';
+import { Link, NavLink, useNavigate } from 'react-router';
+import { logoutRequest } from '~/lib/auth';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+    } finally {
+      navigate('/login');
+    }
+  };
 
   const navLinks = [
     { to: '/dashboard', label: 'Dashboard' },
@@ -38,6 +48,12 @@ const Header = () => {
               {link.label}
             </NavLink>
           ))}
+          <button
+            onClick={handleLogout}
+            className='text-[#393C41] hover:text-[#171A20]'
+          >
+            Logout
+          </button>
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -90,6 +106,12 @@ const Header = () => {
               {link.label}
             </NavLink>
           ))}
+          <button
+            onClick={handleLogout}
+            className='text-left text-base font-medium text-[#393C41] hover:text-[#171A20]'
+          >
+            Logout
+          </button>
         </div>
       )}
     </header>
