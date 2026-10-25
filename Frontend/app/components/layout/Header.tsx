@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router';
 import { logoutRequest } from '~/lib/auth';
+import { ApiRequestError } from '~/lib/api';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,8 +10,24 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await logoutRequest();
-    } finally {
-      navigate('/login');
+
+      // The backend successfully destroyed the session.
+      navigate('/login', { replace: true });
+    } catch (error) {
+      if (
+        error instanceof ApiRequestError &&
+        error.status === 401
+      ) {
+        // The session is already invalid.
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      console.error('Logout failed:', error);
+
+      window.alert(
+        'Logout could not be completed. Please try again.',
+      );
     }
   };
 
@@ -27,7 +44,7 @@ const Header = () => {
       <nav className='mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6'>
         {/* Logo / Brand */}
         <Link
-          to='/'
+          to='/dashboard'
           className='text-[15px] font-medium tracking-tight text-[#171A20]'
         >
           Growth OS

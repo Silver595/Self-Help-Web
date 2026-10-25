@@ -21,6 +21,7 @@ export function refreshSession(): Promise<boolean> {
     refreshing = fetch(`${BASE_URL}/users/refresh-token`, {
       method: 'POST',
       credentials: 'include',
+      cache:'no-store',
     })
       .then((r) => r.ok)
       .catch(() => false)
@@ -47,8 +48,15 @@ export async function api<T = any>(
     fetch(`${BASE_URL}${path}`, {
       method: options.method ?? 'GET',
       credentials: 'include',
-      headers: options.body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      cache:'no-store',
+      headers:
+        options.body !== undefined
+          ? { 'Content-Type': 'application/json' }
+          : undefined,
+      body:
+        options.body !== undefined
+          ? JSON.stringify(options.body)
+          : undefined,
     });
 
   let res = await doFetch();

@@ -17,6 +17,18 @@ export const registerRequest = (data: {
   password: string;
 }) => api<User>('/users/register', { method: 'POST', body: data });
 
-export const getCurrentUser = () => api<User>('/users/current-user');
+let currentUserRequest: Promise<User> | null = null;
+
+export const getCurrentUser = (): Promise<User> => {
+  if (!currentUserRequest) {
+    currentUserRequest = api<User>('/users/current-user').finally(
+      () => {
+        currentUserRequest = null;
+      },
+    );
+  }
+
+  return currentUserRequest;
+};
 
 export const logoutRequest = () => api('/users/logout', { method: 'POST' });

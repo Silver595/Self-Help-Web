@@ -11,6 +11,12 @@ import { apiLimiter } from './middlewares/rateLimit.middleware.js';
 
 const app = express();
 app.set('trust proxy', 1);
+
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+})
+
 app.use(helmet());
 app.use(
   morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev', {
