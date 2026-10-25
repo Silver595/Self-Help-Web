@@ -39,7 +39,7 @@ app.get('/ready', (_req, res) => {
 app.use(
   cors({
     origin: env.CORS_ORIGIN.split(','),
-    credentials: false,
+    credentials: true,
   }),
 );
 
@@ -55,7 +55,6 @@ app.use(
     limit: '16kb',
   }),
 );
-app.use(express.static('public'));
 
 app.use(cookieParser());
 app.use('/api', apiLimiter);
@@ -68,7 +67,7 @@ app.use('/api/v1/users', userRouter);
 
 import resourceRouter from './routes/resource.routes.js';
 
-// Mount under your API version prefix00000
+// Mount under your API version prefix
 app.use('/api/v1/resources', resourceRouter);
 
 import habitRouter from './routes/habit.routes.js';
