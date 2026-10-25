@@ -23,7 +23,7 @@ const journalSchema = new Schema(
       default: 'Productive',
     },
   },
-  { timestamps: true } // Automatically manages createdAt and updatedAt
+  { timestamps: true }, // Automatically manages createdAt and updatedAt
 );
 
 // Performance optimization: Index by user and creation date for fast chronological queries

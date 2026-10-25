@@ -9,9 +9,13 @@ import {
   changeCurrentName,
   logoutAll,
   getSessions,
-  revokeSession
+  revokeSession,
 } from '../controllers/user.controller.js';
-import { registerLimiter,loginLimiter,refreshLimiter } from '../middlewares/rateLimit.middleware.js';
+import {
+  registerLimiter,
+  loginLimiter,
+  refreshLimiter,
+} from '../middlewares/rateLimit.middleware.js';
 import { validateObjectIdParam } from '../middlewares/validateObjectId.middleware.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -20,9 +24,9 @@ const router = Router();
 router.param('id', validateObjectIdParam);
 
 // secured Routes
-router.route('/register').post(registerLimiter,registerUser);
-router.route('/login').post(loginLimiter,loginUser);
-router.route('/refresh-token').post(refreshLimiter,refreshAccessToken);
+router.route('/register').post(registerLimiter, registerUser);
+router.route('/login').post(loginLimiter, loginUser);
+router.route('/refresh-token').post(refreshLimiter, refreshAccessToken);
 
 router.route('/logout-all').post(verifyJWT, logoutAll);
 router.route('/sessions').get(verifyJWT, getSessions);

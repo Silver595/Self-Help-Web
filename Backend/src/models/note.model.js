@@ -26,7 +26,7 @@ const noteSchema = new Schema(
       required: [true, 'Note content is required'],
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Performance optimization: Index by user and creation date

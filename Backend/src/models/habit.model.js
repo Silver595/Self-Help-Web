@@ -34,23 +34,38 @@ const habitSchema = new Schema(
       // normalise and de-duplicate: ["Health", "health "] -> ["health"]
       set: (value) =>
         Array.isArray(value)
-          ? [...new Set(value.map((t) => String(t).trim().toLowerCase()).filter(Boolean))]
+          ? [
+              ...new Set(
+                value
+                  .map((t) => String(t).trim().toLowerCase())
+                  .filter(Boolean),
+              ),
+            ]
           : value,
       validate: [(v) => v.length <= 10, 'A habit can have at most 10 tags'],
     },
 
     schedule: {
-      type: { type: String, enum: ['daily', 'weekdays', 'custom'], default: 'daily' },
+      type: {
+        type: String,
+        enum: ['daily', 'weekdays', 'custom'],
+        default: 'daily',
+      },
       // 0 = Sunday ... 6 = Saturday. Only used when type is 'custom'
       daysOfWeek: {
         type: [{ type: Number, min: 0, max: 6 }],
         default: [],
-        set: (value) => (Array.isArray(value) ? [...new Set(value)].sort() : value),
+        set: (value) =>
+          Array.isArray(value) ? [...new Set(value)].sort() : value,
       },
     },
 
     target: {
-      count: { type: Number, min: [1, 'Target must be at least 1'], default: 1 }, // e.g. 8
+      count: {
+        type: Number,
+        min: [1, 'Target must be at least 1'],
+        default: 1,
+      }, // e.g. 8
       unit: { type: String, trim: true, maxlength: 20, default: 'times' }, // e.g. "glasses"
     },
 
@@ -81,7 +96,7 @@ const habitSchema = new Schema(
       match: [/^#[0-9a-fA-F]{6}$/, 'Color must be a hex value like #4f46e5'],
       default: '#4f46e5',
     },
-    
+
     isArchived: { type: Boolean, default: false },
 
     // Cached values, recomputed by recalculateStreaks() whenever a log changes
@@ -105,14 +120,23 @@ habitSchema.index({ user: 1, isArchived: 1 });
 /* ---------------------------- Cross-field rules ---------------------------- */
 
 habitSchema.pre('validate', async function () {
-  if (this.schedule.type === 'custom' && this.schedule.daysOfWeek.length === 0) {
-    this.invalidate('schedule.daysOfWeek', 'Pick at least one day for a custom schedule');
+  if (
+    this.schedule.type === 'custom' &&
+    this.schedule.daysOfWeek.length === 0
+  ) {
+    this.invalidate(
+      'schedule.daysOfWeek',
+      'Pick at least one day for a custom schedule',
+    );
   }
   if (this.endDate && this.startDate && this.endDate < this.startDate) {
     this.invalidate('endDate', 'End date cannot be before the start date');
   }
   if (this.reminder.enabled && !this.reminder.time) {
-    this.invalidate('reminder.time', 'Reminder time is required when reminders are enabled');
+    this.invalidate(
+      'reminder.time',
+      'Reminder time is required when reminders are enabled',
+    );
   }
 });
 
@@ -161,7 +185,9 @@ habitSchema.methods.recalculateStreaks = async function () {
   const completed = new Set(logs.map((l) => l.date));
 
   const todayNumber = dayNumber(today);
-  const lastNumber = this.endDate ? Math.min(todayNumber, dayNumber(this.endDate)) : todayNumber;
+  const lastNumber = this.endDate
+    ? Math.min(todayNumber, dayNumber(this.endDate))
+    : todayNumber;
 
   let run = 0;
   let longest = 0;

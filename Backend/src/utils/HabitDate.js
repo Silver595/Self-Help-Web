@@ -13,15 +13,21 @@ export const MAX_RANGE_DAYS = 366;
 
 // Date.parse("YYYY-MM-DD") is always UTC midnight, so this is an exact integer
 export const dayNumber = (dateStr) => Math.floor(Date.parse(dateStr) / DAY_MS);
-export const fromDayNumber = (n) => new Date(n * DAY_MS).toISOString().slice(0, 10);
-export const addDays = (dateStr, days) => fromDayNumber(dayNumber(dateStr) + days);
-export const weekdayOf = (dateStr) => new Date(`${dateStr}T00:00:00Z`).getUTCDay(); // 0 = Sunday
+export const fromDayNumber = (n) =>
+  new Date(n * DAY_MS).toISOString().slice(0, 10);
+export const addDays = (dateStr, days) =>
+  fromDayNumber(dayNumber(dateStr) + days);
+export const weekdayOf = (dateStr) =>
+  new Date(`${dateStr}T00:00:00Z`).getUTCDay(); // 0 = Sunday
 
 // Rejects bad formats AND impossible dates such as 2026-02-30
 export const isValidDateString = (value) => {
   if (typeof value !== 'string' || !DATE_RE.test(value)) return false;
   const parsed = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+  return (
+    !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === value
+  );
 };
 
 export const isValidTimezone = (tz) => {
@@ -45,7 +51,10 @@ export const todayInTimezone = (timezone = 'Asia/Kolkata') =>
 // Throws a 400 if the value is not a real YYYY-MM-DD date
 export const assertDate = (value, label = 'date') => {
   if (!isValidDateString(value)) {
-    throw new ApiError(400, `${label} must be a valid date in YYYY-MM-DD format`);
+    throw new ApiError(
+      400,
+      `${label} must be a valid date in YYYY-MM-DD format`,
+    );
   }
 };
 

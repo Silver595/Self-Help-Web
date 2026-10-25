@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  paginationQuerySchema,
-  atLeastOneField,
-} from './common.validator.js';
+import { paginationQuerySchema, atLeastOneField } from './common.validator.js';
 
 const MOODS = ['Productive', 'Calm', 'Stressed', 'Motivated', 'Reflective'];
 

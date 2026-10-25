@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+jar.txt
+old.txt
+*.cookies
+.DS_Store
+coverage/
+dist/
+build/
+.react-router/

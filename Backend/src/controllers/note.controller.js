@@ -8,17 +8,23 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 const createNote = asyncHandler(async (req, res) => {
   const { title, content, resourceId, habitId } = req.body;
 
-  if (resourceId && !(await Resource.exists({
-    _id: resourceId,
-    user: req.user._id,
-  }))) {
+  if (
+    resourceId &&
+    !(await Resource.exists({
+      _id: resourceId,
+      user: req.user._id,
+    }))
+  ) {
     throw new ApiError(404, 'Resource not found');
   }
 
-  if (habitId && !(await Habit.exists({
-    _id: habitId,
-    user: req.user._id,
-  }))) {
+  if (
+    habitId &&
+    !(await Habit.exists({
+      _id: habitId,
+      user: req.user._id,
+    }))
+  ) {
     throw new ApiError(404, 'Habit not found');
   }
 
@@ -51,12 +57,16 @@ const getNotes = asyncHandler(async (req, res) => {
   ]);
 
   return res.status(200).json(
-    new ApiResponse(200, {
-      notes,
-      totalPages: Math.ceil(totalNotes / limit),
-      currentPage: page,
-      totalNotes,
-    }, 'Notes fetched successfully'),
+    new ApiResponse(
+      200,
+      {
+        notes,
+        totalPages: Math.ceil(totalNotes / limit),
+        currentPage: page,
+        totalNotes,
+      },
+      'Notes fetched successfully',
+    ),
   );
 });
 
@@ -64,17 +74,23 @@ const updateNote = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { resourceId, habitId, ...updates } = req.body;
 
-  if (resourceId && !(await Resource.exists({
-    _id: resourceId,
-    user: req.user._id,
-  }))) {
+  if (
+    resourceId &&
+    !(await Resource.exists({
+      _id: resourceId,
+      user: req.user._id,
+    }))
+  ) {
     throw new ApiError(404, 'Resource not found');
   }
 
-  if (habitId && !(await Habit.exists({
-    _id: habitId,
-    user: req.user._id,
-  }))) {
+  if (
+    habitId &&
+    !(await Habit.exists({
+      _id: habitId,
+      user: req.user._id,
+    }))
+  ) {
     throw new ApiError(404, 'Habit not found');
   }
 
