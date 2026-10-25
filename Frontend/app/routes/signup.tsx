@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, CheckCircle2 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { loginRequest, registerRequest } from '~/lib/auth';
 
 interface SignUpPageProps {
   onNavigateToLogin?: () => void;
@@ -11,7 +12,9 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   onNavigateToLogin,
   onSignUpSuccess,
 }) => {
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -19,11 +22,11 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
-    if (!fullName || !email || !password) {
+    if (!fullName || !username || !email || !password) {
       setError('Please fill in all fields.');
       return;
     }
@@ -35,15 +38,16 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
 
     setIsLoading(true);
 
-    // Simulate Registration Request
-    setTimeout(() => {
+    try {
+      await registerRequest({ fullname: fullName, email, username, password });
+      await loginRequest(email, password);
+      if (onSignUpSuccess) onSignUpSuccess(fullName, email);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Sign up failed.');
+    } finally {
       setIsLoading(false);
-      if (onSignUpSuccess) {
-        onSignUpSuccess(fullName, email);
-      } else {
-        alert(`Account created successfully for ${fullName}`);
-      }
-    }, 1200);
+    }
   };
 
   return (
@@ -94,6 +98,29 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
             />
           </div>
 
+          {/* Username Input */}
+          <div className='space-y-1.5'>
+            <label
+              htmlFor='username'
+              className='block text-xs font-semibold uppercase tracking-wider text-[#5C5E62]'
+            >
+              Username
+            </label>
+            <input
+              id='username'
+              type='text'
+              required
+              minLength={3}
+              maxLength={30}
+              placeholder='alexmorgan'
+              value={username}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setUsername(e.target.value)
+              }
+              className='w-full h-11 bg-[#F4F4F4] border border-transparent rounded-lg px-4 text-sm text-[#171A20] placeholder-[#5C5E62]/60 focus:bg-white focus:border-[#171A20] focus:outline-none transition-all duration-200'
+            />
+          </div>
+
           {/* Email Input */}
           <div className='space-y-1.5'>
             <label
@@ -128,7 +155,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
                 id='signUpPassword'
                 type={showPassword ? 'text' : 'password'}
                 required
-                placeholder='At least 8 characters'
+                placeholder='8+ chars, letter, number, symbol'
                 value={password}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setPassword(e.target.value)

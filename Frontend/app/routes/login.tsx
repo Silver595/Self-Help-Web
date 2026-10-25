@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { loginRequest } from '~/lib/auth';
 
 interface LoginPageProps {
   onNavigateToSignUp?: () => void;
@@ -11,13 +12,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   onNavigateToSignUp,
   onLoginSuccess,
 }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
 
@@ -28,15 +30,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({
 
     setIsLoading(true);
 
-    // Simulate API Auth Request
-    setTimeout(() => {
+    try {
+      await loginRequest(email, password);
+      if (onLoginSuccess) onLoginSuccess(email);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed.');
+    } finally {
       setIsLoading(false);
-      if (onLoginSuccess) {
-        onLoginSuccess(email);
-      } else {
-        alert(`Logged in successfully as ${email}`);
-      }
-    }, 1200);
+    }
   };
 
   return (
