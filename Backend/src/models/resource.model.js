@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
+import { RESOURCE_TYPES, RESOURCE_STATUSES } from '../constants.js';
 
 const resourceSchema = new Schema(
   {
@@ -14,15 +15,15 @@ const resourceSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['Book', 'Article', 'YouTube'],
+      enum: RESOURCE_TYPES,
       required: [true, 'Resource type is required'],
     },
     link: { type: String, trim: true },
     author: { type: String, trim: true },
     status: {
       type: String,
-      enum: ['To Read', 'Reading', 'Completed'],
-      default: 'To Read',
+      enum: RESOURCE_STATUSES,
+      default: RESOURCE_STATUSES[0],
     },
     rating: { type: Number, min: 1, max: 5 },
   },

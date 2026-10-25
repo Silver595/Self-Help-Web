@@ -1,7 +1,7 @@
 // Contains the database connection logic, typically a function that calls mongoose.connect(...) with your connection string from .env, wrapped in try/catch. It’s kept separate so connection details don’t clutter your server startup code. The main index.js just calls connectDB().
 import { env } from '../config/env.js';
 import mongoose from 'mongoose';
-import { DB_NAME } from '../constanst.js';
+import { DB_NAME } from '../constants.js';
 
 const connectDB = async () => {
   try {
