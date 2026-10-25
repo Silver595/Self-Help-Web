@@ -21,15 +21,36 @@ const noteSchema = new Schema(
       type: String,
       trim: true,
     },
-    content: {
-      type: String,
-      required: [true, 'Note content is required'],
+    content: { type: String, trim: true, default: '' }, // your reflection
+    quote: { type: String, trim: true, maxlength: 1000 },
+    tags: {
+      type: [{ type: String, trim: true, lowercase: true, maxlength: 20 }],
+      // normalise and de-duplicate: ["Focus", "focus "] -> ["focus"]
+      set: (value) =>
+        Array.isArray(value)
+          ? [
+              ...new Set(
+                value
+                  .map((t) => String(t).trim().toLowerCase())
+                  .filter(Boolean),
+              ),
+            ]
+          : value,
+      validate: [(v) => v.length <= 10, 'A note can have at most 10 tags'],
     },
   },
   { timestamps: true },
 );
 
+// A note needs a quote or some content (or both)
+noteSchema.pre('validate', async function () {
+  if (!this.content && !this.quote) {
+    this.invalidate('content', 'Add a quote or some content');
+  }
+});
+
 // Performance optimization: Index by user and creation date
 noteSchema.index({ user: 1, createdAt: -1 });
+noteSchema.index({ user: 1, tags: 1 });
 
 export const Note = mongoose.model('Note', noteSchema);
