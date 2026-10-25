@@ -10,7 +10,7 @@ import morgan from 'morgan';
 import { apiLimiter } from './middlewares/rateLimit.middleware.js';
 
 const app = express();
-
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(
   morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev', {

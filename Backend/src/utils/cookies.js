@@ -1,10 +1,12 @@
 import { env } from '../config/env.js';
 import { toMs } from './duration.js';
 
+const isProduction = env.NODE_ENV === 'production';
+
 const base = {
-  httpOnly: true, // JavaScript can't read it (blocks XSS token theft)
-  secure: env.NODE_ENV === 'production', // HTTPS only in production
-  sameSite: 'lax', // not sent on cross-site POSTs (CSRF defence)
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
 };
 
 export const accessCookieOptions = {
