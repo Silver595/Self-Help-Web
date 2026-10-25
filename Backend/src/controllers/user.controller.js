@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-import mongoose from 'mongoose';
 import { Session } from '../models/session.model.js';
 import { createSession, rotateSession } from '../services/session.service.js';
 import { accessCookieOptions, refreshCookieOptions } from '../utils/cookies.js';
@@ -154,12 +153,11 @@ const getSessions = asyncHandler(async (req, res) => {
 });
 
 const revokeSession = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new ApiError(400, 'Invalid session ID');
-  }
-
-  const result = await Session.deleteOne({ _id: id, user: req.user._id });
+  // the :id format is already checked by router.param in user.routes.js
+  const result = await Session.deleteOne({
+    _id: req.params.id,
+    user: req.user._id,
+  });
   if (!result.deletedCount) throw new ApiError(404, 'Session not found');
 
   return res.status(200).json(new ApiResponse(200, {}, 'Session revoked'));
