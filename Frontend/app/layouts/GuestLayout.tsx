@@ -1,16 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+} from 'react-router';
 import { getCurrentUser } from '~/lib/auth';
 
 export default function GuestLayout() {
-  const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [checkedPath, setCheckedPath] = useState<string | null>(null);
+  const { pathname } = useLocation();
+
+  const [checkedPath, setCheckedPath] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     let active = true;
 
-    // Hide the auth form until this route's session check finishes.
+    // Hide public content while checking authentication.
     setCheckedPath(null);
 
     getCurrentUser()
@@ -20,7 +27,7 @@ export default function GuestLayout() {
         }
       })
       .catch(() => {
-        // No valid session: allow login/signup to render.
+        // No valid session. Allow the public page to render.
         if (active) {
           setCheckedPath(pathname);
         }
