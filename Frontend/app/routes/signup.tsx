@@ -88,7 +88,7 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
 
       onSignUpSuccess?.(fullName.trim(), email.trim());
 
-      navigate('/dashboard');
+      navigate('/dashboard',{replace:true});
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Sign up failed.'

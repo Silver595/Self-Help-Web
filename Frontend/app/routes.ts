@@ -6,10 +6,14 @@ import {
 } from '@react-router/dev/routes';
 
 export default [
-  // Public Standalone Pages (No AppLayout wrapper)
+  // Public landing page
   index('routes/home.tsx'),
-  route('login', 'routes/login.tsx'),
-  route('signup', 'routes/signup.tsx'),
+
+  // Guest-only authentication pages
+  layout('layouts/GuestLayout.tsx', [
+    route('login', 'routes/login.tsx'),
+    route('signup', 'routes/signup.tsx'),
+  ]),
 
   // Authenticated App Pages (Wrapped in AppLayout)
   layout('layouts/AppLayout.tsx', [
@@ -18,7 +22,7 @@ export default [
     route('library', 'routes/library.tsx'),
     // route('expenses', 'routes/expenses.tsx'),
     // route('inspiration', 'routes/inspiration.tsx'),
-    
+
     // Catch-all route for features under construction or non-existent routes
     route('*', 'components/ComingSoon.tsx'),
   ]),

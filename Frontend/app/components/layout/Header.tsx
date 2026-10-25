@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router';
 import { logoutRequest } from '~/lib/auth';
+import { ApiRequestError } from '~/lib/api';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,9 +9,27 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
+      // Existing API call destroys the server session
+      // and clears the authentication cookies.
       await logoutRequest();
-    } finally {
-      navigate('/login');
+
+      // Replace the current protected history entry.
+      navigate('/login', { replace: true });
+    } catch (error) {
+      // If authentication is already invalid, return to login.
+      if (
+        error instanceof ApiRequestError &&
+        error.status === 401
+      ) {
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      console.error('Logout failed:', error);
+
+      window.alert(
+        'Could not complete logout. Check your connection and try again.',
+      );
     }
   };
 

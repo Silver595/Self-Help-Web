@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, Eye, EyeOff } from 'lucide-react';
-import { Link, useNavigate } from 'react-router';
+import { Link, replace, useNavigate } from 'react-router';
 import { loginRequest } from '~/lib/auth';
 import { AuthLayout } from '~/components/auth/AuthLayout';
 
@@ -38,7 +38,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       await loginRequest(email.trim(), password);
 
       onLoginSuccess?.(email.trim());
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true});
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Login failed.'
