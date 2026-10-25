@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import {
+  CheckCircle2,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
-import { loginRequest, registerRequest } from '~/lib/auth';
+import {
+  loginRequest,
+  registerRequest,
+} from '~/lib/auth';
+import { AuthLayout } from '~/components/auth/AuthLayout';
 
 interface SignUpPageProps {
   onNavigateToLogin?: () => void;
@@ -13,21 +21,51 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
   onSignUpSuccess,
 }) => {
   const navigate = useNavigate();
-  const [fullName, setFullName] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [agreedToTerms, setAgreedToTerms] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
     setError('');
 
-    if (!fullName || !username || !email || !password) {
+    if (
+      !fullName.trim() ||
+      !username.trim() ||
+      !email.trim() ||
+      !password
+    ) {
       setError('Please fill in all fields.');
+      return;
+    }
+
+    if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+    ) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    if (
+      username.trim().length < 3 ||
+      username.trim().length > 30
+    ) {
+      setError(
+        'Username must be between 3 and 30 characters.'
+      );
+      return;
+    }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
       return;
     }
 
@@ -39,205 +77,213 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
     setIsLoading(true);
 
     try {
-      await registerRequest({ fullname: fullName, email, username, password });
-      await loginRequest(email, password);
-      if (onSignUpSuccess) onSignUpSuccess(fullName, email);
+      await registerRequest({
+        fullname: fullName.trim(),
+        email: email.trim(),
+        username: username.trim(),
+        password,
+      });
+
+      await loginRequest(email.trim(), password);
+
+      onSignUpSuccess?.(fullName.trim(), email.trim());
+
       navigate('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign up failed.');
+      setError(
+        err instanceof Error ? err.message : 'Sign up failed.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className='min-h-screen bg-[#FFFFFF] text-[#171A20] font-sans flex flex-col justify-between p-6 sm:p-10'>
-      {/* Top Brand Logo Header */}
-      <header className='w-full max-w-md mx-auto flex justify-center items-center py-2'>
-        <span className='text-[17px] font-medium tracking-tight text-[#171A20]'>
-          Growth OS
-        </span>
-      </header>
-
-      {/* Main Sign Up Card Form */}
-      <main className='w-full max-w-[400px] mx-auto my-auto space-y-8 animate-fadeIn'>
-        <div className='space-y-2 text-center sm:text-left'>
-          <h1 className='text-3xl font-semibold tracking-tight text-[#171A20]'>
-            Create Account
-          </h1>
-          <p className='text-sm text-[#5C5E62]'>
-            Start tracking habits, notes, and goals with your private OS.
-          </p>
-        </div>
-
+    <AuthLayout
+      eyebrow="BEGIN YOUR RECORD"
+      title={
+        <>
+          Create your
+          <br className="auth-title-break" /> workspace.
+        </>
+      }
+      description="Start with a private space for the actions and ideas worth returning to."
+    >
+      <form
+        className="auth-form"
+        onSubmit={handleSubmit}
+        noValidate
+      >
         {error && (
-          <div className='p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600'>
-            {error}
+          <div className="auth-error" role="alert">
+            <strong>We couldn't create your account.</strong>
+            <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          {/* Full Name Input */}
-          <div className='space-y-1.5'>
-            <label
-              htmlFor='fullName'
-              className='block text-xs font-semibold uppercase tracking-wider text-[#5C5E62]'
-            >
-              Full Name
-            </label>
+        {/* Full Name */}
+        <label
+          className="auth-field"
+          htmlFor="signup-full-name"
+        >
+          <span>Full name</span>
+
+          <input
+            id="signup-full-name"
+            name="fullName"
+            type="text"
+            required
+            autoComplete="name"
+            placeholder="Alex Morgan"
+            value={fullName}
+            onChange={(event) =>
+              setFullName(event.target.value)
+            }
+          />
+        </label>
+
+        {/* Username */}
+        <label
+          className="auth-field"
+          htmlFor="signup-username"
+        >
+          <span>Username</span>
+
+          <input
+            id="signup-username"
+            name="username"
+            type="text"
+            required
+            minLength={3}
+            maxLength={30}
+            autoComplete="username"
+            placeholder="alexmorgan"
+            value={username}
+            onChange={(event) =>
+              setUsername(event.target.value)
+            }
+          />
+
+          <small>3–30 characters</small>
+        </label>
+
+        {/* Email */}
+        <label
+          className="auth-field"
+          htmlFor="signup-email"
+        >
+          <span>Email address</span>
+
+          <input
+            id="signup-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="alex@example.com"
+            value={email}
+            onChange={(event) =>
+              setEmail(event.target.value)
+            }
+          />
+        </label>
+
+        {/* Password */}
+        <label
+          className="auth-field"
+          htmlFor="signup-password"
+        >
+          <span>Password</span>
+
+          <div className="auth-password">
             <input
-              id='fullName'
-              type='text'
+              id="signup-password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
               required
-              placeholder='Alex Morgan'
-              value={fullName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setFullName(e.target.value)
+              minLength={8}
+              autoComplete="new-password"
+              placeholder="At least 8 characters"
+              value={password}
+              onChange={(event) =>
+                setPassword(event.target.value)
               }
-              className='w-full h-11 bg-[#F4F4F4] border border-transparent rounded-lg px-4 text-sm text-[#171A20] placeholder-[#5C5E62]/60 focus:bg-white focus:border-[#171A20] focus:outline-none transition-all duration-200'
             />
+
+            <button
+              type="button"
+              className="auth-password__toggle"
+              onClick={() =>
+                setShowPassword((visible) => !visible)
+              }
+              aria-label={
+                showPassword ? 'Hide password' : 'Show password'
+              }
+            >
+              {showPassword ? (
+                <EyeOff size={16} />
+              ) : (
+                <Eye size={16} />
+              )}
+            </button>
           </div>
 
-          {/* Username Input */}
-          <div className='space-y-1.5'>
-            <label
-              htmlFor='username'
-              className='block text-xs font-semibold uppercase tracking-wider text-[#5C5E62]'
-            >
-              Username
-            </label>
-            <input
-              id='username'
-              type='text'
-              required
-              minLength={3}
-              maxLength={30}
-              placeholder='alexmorgan'
-              value={username}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setUsername(e.target.value)
-              }
-              className='w-full h-11 bg-[#F4F4F4] border border-transparent rounded-lg px-4 text-sm text-[#171A20] placeholder-[#5C5E62]/60 focus:bg-white focus:border-[#171A20] focus:outline-none transition-all duration-200'
-            />
-          </div>
+          <small>Use at least 8 characters.</small>
+        </label>
 
-          {/* Email Input */}
-          <div className='space-y-1.5'>
-            <label
-              htmlFor='signUpEmail'
-              className='block text-xs font-semibold uppercase tracking-wider text-[#5C5E62]'
-            >
-              Email Address
-            </label>
-            <input
-              id='signUpEmail'
-              type='email'
-              required
-              placeholder='name@domain.com'
-              value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setEmail(e.target.value)
-              }
-              className='w-full h-11 bg-[#F4F4F4] border border-transparent rounded-lg px-4 text-sm text-[#171A20] placeholder-[#5C5E62]/60 focus:bg-white focus:border-[#171A20] focus:outline-none transition-all duration-200'
-            />
-          </div>
+        {/* Terms */}
+        <div className="auth-terms">
+          <input
+            id="signup-terms"
+            type="checkbox"
+            checked={agreedToTerms}
+            onChange={(event) =>
+              setAgreedToTerms(event.target.checked)
+            }
+          />
 
-          {/* Password Input */}
-          <div className='space-y-1.5'>
-            <label
-              htmlFor='signUpPassword'
-              className='block text-xs font-semibold uppercase tracking-wider text-[#5C5E62]'
-            >
-              Password
-            </label>
-            <div className='relative'>
-              <input
-                id='signUpPassword'
-                type={showPassword ? 'text' : 'password'}
-                required
-                placeholder='8+ chars, letter, number, symbol'
-                value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setPassword(e.target.value)
-                }
-                className='w-full h-11 bg-[#F4F4F4] border border-transparent rounded-lg pl-4 pr-11 text-sm text-[#171A20] placeholder-[#5C5E62]/60 focus:bg-white focus:border-[#171A20] focus:outline-none transition-all duration-200'
+          <label htmlFor="signup-terms">
+            I agree to the{' '}
+            <a href="#terms">Terms of Service</a>
+            {' '}and{' '}
+            <a href="#privacy">Privacy Policy</a>.
+          </label>
+        </div>
+
+        {/* Submit */}
+        <button
+          className="auth-submit"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <span className="auth-spinner" />
+              Creating workspace…
+            </>
+          ) : (
+            <>
+              Create account
+              <CheckCircle2
+                size={16}
+                aria-hidden="true"
               />
-              <button
-                type='button'
-                onClick={() => setShowPassword(!showPassword)}
-                className='absolute right-3.5 top-1/2 -translate-y-1/2 text-[#5C5E62] hover:text-[#171A20] transition-colors'
-                aria-label='Toggle password visibility'
-              >
-                {showPassword ? (
-                  <EyeOff className='w-4 h-4' />
-                ) : (
-                  <Eye className='w-4 h-4' />
-                )}
-              </button>
-            </div>
-          </div>
+            </>
+          )}
+        </button>
 
-          {/* Terms Checkbox */}
-          <div className='flex items-start gap-3 pt-2'>
-            <input
-              id='terms'
-              type='checkbox'
-              checked={agreedToTerms}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAgreedToTerms(e.target.checked)
-              }
-              className='mt-1 w-4 h-4 rounded border-[#D0D1D2] text-[#171A20] focus:ring-[#171A20] cursor-pointer'
-            />
-            <label
-              htmlFor='terms'
-              className='text-xs text-[#5C5E62] leading-tight cursor-pointer'
-            >
-              I agree to the{' '}
-              <a href='#terms' className='text-[#171A20] underline'>
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a href='#privacy' className='text-[#171A20] underline'>
-                Privacy Policy
-              </a>
-              .
-            </label>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type='submit'
-            disabled={isLoading}
-            className='w-full h-11 bg-[#171A20] hover:bg-[#393C41] active:bg-[#2D58CC] text-white rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 mt-2'
-          >
-            {isLoading ? (
-              <span className='inline-block w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin' />
-            ) : (
-              <>
-                <span>Get Started</span>
-                <CheckCircle2 className='w-4 h-4' />
-              </>
-            )}
-          </button>
-        </form>
-
-        {/* Navigation Link to Login */}
-        <p className='text-center text-xs text-[#5C5E62]'>
+        {/* Login navigation */}
+        <p className="auth-switch">
           Already have an account?{' '}
           <Link
-            to='/login'
-            className='text-[#3E6AE1] hover:underline font-medium cursor-pointer'
+            to="/login"
+            onClick={onNavigateToLogin}
           >
-            Sign In
+            Sign in
           </Link>
         </p>
-      </main>
-
-      {/* Footer Minimal Notice */}
-      <footer className='w-full max-w-md mx-auto text-center text-xs text-[#5C5E62] py-2'>
-        <span>Growth OS Inc. © {new Date().getFullYear()}</span>
-      </footer>
-    </div>
+      </form>
+    </AuthLayout>
   );
 };
 
