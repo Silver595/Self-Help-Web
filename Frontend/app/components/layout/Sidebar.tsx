@@ -156,7 +156,7 @@ export default function Sidebar({
                     e.stopPropagation(); // Prevents sidebar from expanding when clicking a nav item
                     onNavigate(id);
                   }}
-                  className={`flex items-center rounded-xl border border-neutral-300/70 bg-[#ececec] transition-all shadow-[0_12px_20px_-6px_rgba(0,0,0,0.08)] cursor-pointer ${
+                  className={`flex items-center rounded-xl border-b border-b-gray-400 bg-[#ececec] transition-all  cursor-pointer ${
                     collapsed
                       ? 'w-13 h-11 justify-center gap-1 px-1 py-1 text-[9px]'
                       : 'w-full px-3.5 py-2.5 text-[11px] tracking-wider'
@@ -230,7 +230,7 @@ export default function Sidebar({
                 e.stopPropagation();
                 onSearch();
               }}
-              className='flex w-full items-center justify-between rounded-xl border border-neutral-300/70 bg-[#ececec] px-3.5 py-2 text-[11px] tracking-wider text-neutral-600 shadow-[0_12px_20px_-6px_rgba(0,0,0,0.08)] hover:text-neutral-900 hover:border-neutral-400 transition-all cursor-pointer'
+              className='flex w-full items-center justify-between rounded-xl border-b border-b-gray-400 bg-[#ececec] px-3.5 py-2 text-[11px] tracking-wider text-neutral-600 shadow-[0_12px_20px_-6px_rgba(0,0,0,0.08)] hover:text-neutral-900 hover:border-neutral-400 transition-all cursor-pointer'
             >
               <div className='flex items-center gap-3'>
                 <Search size={16} strokeWidth={1.75} />
