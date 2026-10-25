@@ -1,5 +1,9 @@
 import mongoose, { Schema } from 'mongoose';
-import { RESOURCE_TYPES, RESOURCE_STATUSES } from '../constants.js';
+import {
+  RESOURCE_TYPES,
+  RESOURCE_STATUSES,
+  RESOURCE_CATEGORIES,
+} from '../constants.js';
 
 const resourceSchema = new Schema(
   {
@@ -26,9 +30,33 @@ const resourceSchema = new Schema(
       default: RESOURCE_STATUSES[0],
     },
     rating: { type: Number, min: 1, max: 5 },
+    category: { type: String, enum: RESOURCE_CATEGORIES },
+    pages: { type: Number, min: 1 },
+    currentPage: { type: Number, min: 0, default: 0 },
+    summary: { type: String, trim: true, maxlength: 1000 },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true }, // puts "progress" into API responses
+    id: false, // we already send _id; skip the duplicate "id"
+  },
 );
+
+// 0-100, computed from the pages instead of stored, so it can never go stale
+resourceSchema.virtual('progress').get(function () {
+  if (this.status === 'Completed') return 100;
+  if (!this.pages) return 0;
+  return Math.min(100, Math.round((this.currentPage / this.pages) * 100));
+});
+
+resourceSchema.pre('validate', async function () {
+  if (this.pages && this.currentPage > this.pages) {
+    this.invalidate(
+      'currentPage',
+      'Current page cannot be greater than total pages',
+    );
+  }
+});
 
 // Bug Fix: Prevent duplicate resource titles per user
 resourceSchema.index({ user: 1, title: 1 }, { unique: true });

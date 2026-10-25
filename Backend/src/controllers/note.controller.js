@@ -6,7 +6,7 @@ import { Habit } from '../models/habit.model.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 
 const createNote = asyncHandler(async (req, res) => {
-  const { title, content, resourceId, habitId } = req.body;
+  const { title, content, quote, tags, resourceId, habitId } = req.body;
 
   if (
     resourceId &&
@@ -31,6 +31,8 @@ const createNote = asyncHandler(async (req, res) => {
   const note = await Note.create({
     title,
     content,
+    quote,
+    tags,
     resource: resourceId || undefined,
     habit: habitId || undefined,
     user: req.user._id,
@@ -42,14 +44,16 @@ const createNote = asyncHandler(async (req, res) => {
 });
 
 const getNotes = asyncHandler(async (req, res) => {
-  const { resourceId, habitId, page, limit } = req.validQuery;
+  const { resourceId, habitId, tag, page, limit } = req.validQuery;
   const filter = { user: req.user._id };
 
   if (resourceId) filter.resource = resourceId;
   if (habitId) filter.habit = habitId;
+  if (tag) filter.tags = tag;
 
   const [notes, totalNotes] = await Promise.all([
     Note.find(filter)
+      .populate('resource', 'title author') // so the UI can show the book name
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit),
@@ -97,15 +101,14 @@ const updateNote = asyncHandler(async (req, res) => {
   if (resourceId !== undefined) updates.resource = resourceId;
   if (habitId !== undefined) updates.habit = habitId;
 
-  const note = await Note.findOneAndUpdate(
-    { _id: id, user: req.user._id },
-    { $set: updates },
-    { new: true, runValidators: true },
-  );
+  const note = await Note.findOne({ _id: id, user: req.user._id });
 
   if (!note) {
     throw new ApiError(404, 'Note not found or unauthorized');
   }
+
+  note.set(updates);
+  await note.save(); // save() runs the model rules (a quote or content is required)
 
   return res
     .status(200)
