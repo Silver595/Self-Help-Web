@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import { paginationQuerySchema, atLeastOneField } from './common.validator.js';
 
-const TYPES = ['Book', 'Article', 'YouTube', 'Documentory'];
-const STATUSES = ['Plan to Do', 'In progress', 'Completed'];
+import {
+  RESOURCE_TYPES as TYPES,
+  RESOURCE_STATUSES as STATUSES,
+} from '../constants.js';
 
 export const createResourceSchema = z.object({
   title: z
@@ -11,7 +13,7 @@ export const createResourceSchema = z.object({
     .min(1, 'Title is required')
     .max(200),
   type: z.enum(TYPES, {
-    error: 'Type must be Book, Article, YouTube or Documentory',
+    error: 'Type must be Book, Article, YouTube or Documentary',
   }),
   // http(s) only: blocks javascript: links that would become XSS when rendered as href
   link: z
