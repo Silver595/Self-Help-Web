@@ -1,4 +1,3 @@
-
 import crypto from 'node:crypto';
 import { env } from '../config/env.js';
 import mongoose, { Schema } from 'mongoose';
@@ -9,10 +8,7 @@ const BCRYPT_ROUNDS = 12;
 
 // A real bcrypt hash of a throwaway string, created once at startup
 // to keep login timing similar when an email does not exist.
-export const DUMMY_HASH = bcrypt.hashSync(
-  'not-a-real-password',
-  BCRYPT_ROUNDS
-);
+export const DUMMY_HASH = bcrypt.hashSync('not-a-real-password', BCRYPT_ROUNDS);
 
 const userSchema = new Schema(
   {

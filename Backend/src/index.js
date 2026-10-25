@@ -1,5 +1,5 @@
 // The entry point. It loads environment variables, connects to the database, and then starts the server with app.listen(PORT). Separating app.js (configuration) from index.js (startup) makes testing and organization easier.
-import { env } from './config/env.js'
+import { env } from './config/env.js';
 import { app } from './app.js';
 import dns from 'node:dns';
 import connectDB from './db/index.js';

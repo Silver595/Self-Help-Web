@@ -1,10 +1,10 @@
 // Where you create and configure the Express app: middleware setup (cors, express.json(), cookieParser), and mounting your routes. It only configures the app and does not start the server.
 import { env } from './config/env.js';
-import mongoose from "mongoose";
-import express from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import { ApiError } from "./utils/ApiError.js";
+import mongoose from 'mongoose';
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import { ApiError } from './utils/ApiError.js';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { apiLimiter } from './middlewares/rateLimit.middleware.js';
@@ -15,24 +15,24 @@ app.use(helmet());
 app.use(
   morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev', {
     skip: (req) => req.path === '/health' || req.path === '/ready',
-  })
-)
+  }),
+);
 
 // bro! the below health check section is for CI that we need to implement later on
 
-app.get("/health", (_req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({
-    status: "ok",
+    status: 'ok',
     uptime: process.uptime(),
   });
 });
 
-app.get("/ready", (_req, res) => {
+app.get('/ready', (_req, res) => {
   // this is for readiness : for checks the MongoDB connection
   const dbUp = mongoose.connection.readyState === 1;
   res.status(dbUp ? 200 : 503).json({
-    status: dbUp ? "ready" : "not_ready",
-    db: dbUp ? "up" : "down",
+    status: dbUp ? 'ready' : 'not_ready',
+    db: dbUp ? 'up' : 'down',
   });
 });
 
@@ -45,53 +45,51 @@ app.use(
 
 app.use(
   express.json({
-    limit: "16kb",
+    limit: '16kb',
   }),
 );
 
 app.use(
   express.urlencoded({
     extended: true,
-    limit: "16kb",
+    limit: '16kb',
   }),
 );
-app.use(express.static("public"));
+app.use(express.static('public'));
 
 app.use(cookieParser());
 app.use('/api', apiLimiter);
 // Routes
-import userRouter from "./routes/user.routes.js";
+import userRouter from './routes/user.routes.js';
 
 // Routes declarations
-app.use("/api/v1/users", userRouter);
+app.use('/api/v1/users', userRouter);
 // Will pass to the users route https://localhost:8000/api/v1/users/login
 
-import resourceRouter from "./routes/resource.routes.js";
+import resourceRouter from './routes/resource.routes.js';
 
 // Mount under your API version prefix00000
-app.use("/api/v1/resources", resourceRouter);
+app.use('/api/v1/resources', resourceRouter);
 
-import habitRouter from "./routes/habit.routes.js";
+import habitRouter from './routes/habit.routes.js';
 
-app.use("/api/v1/habits", habitRouter);
+app.use('/api/v1/habits', habitRouter);
 
-import noteRouter from "./routes/note.routes.js";
+import noteRouter from './routes/note.routes.js';
 
-app.use("/api/v1/notes", noteRouter);
+app.use('/api/v1/notes', noteRouter);
 
-import journalRouter from "./routes/journal.routes.js";
+import journalRouter from './routes/journal.routes.js';
 
-app.use("/api/v1/journals", journalRouter);
+app.use('/api/v1/journals', journalRouter);
 
 app.use((req, _res, next) => {
-  next(new ApiError(404,
-    `Path not found: ${req.method} ${req.originalUrl}`
-  ))
-})
+  next(new ApiError(404, `Path not found: ${req.method} ${req.originalUrl}`));
+});
 
 app.use((err, _req, res, next) => {
   if (err.code === 11000) {
-    err = new ApiError(409, 'Duplicate value: already exists')
+    err = new ApiError(409, 'Duplicate value: already exists');
   }
 
   const statusCode = err.statusCode || err.status || 500;
@@ -99,10 +97,11 @@ app.use((err, _req, res, next) => {
 
   res.status(statusCode).json({
     statusCode,
-    success: false, message: statusCode === 500 && Prod ? 'Internal Server Error' : err.message,
-    errors:err.errors || [],
+    success: false,
+    message: statusCode === 500 && Prod ? 'Internal Server Error' : err.message,
+    errors: err.errors || [],
     ...(Prod ? {} : { stack: err.stack }),
-  })
-})
+  });
+});
 
 export { app };

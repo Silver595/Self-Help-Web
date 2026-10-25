@@ -37,12 +37,16 @@ const getResources = asyncHandler(async (req, res) => {
   ]);
 
   return res.status(200).json(
-    new ApiResponse(200, {
-      resources,
-      totalPages: Math.ceil(totalResources / limit),
-      currentPage: page,
-      totalResources,
-    }, 'Resources fetched successfully'),
+    new ApiResponse(
+      200,
+      {
+        resources,
+        totalPages: Math.ceil(totalResources / limit),
+        currentPage: page,
+        totalResources,
+      },
+      'Resources fetched successfully',
+    ),
   );
 });
 
@@ -77,9 +81,4 @@ const deleteResource = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, 'Resource deleted successfully'));
 });
 
-export {
-  createResource,
-  getResources,
-  updateResource,
-  deleteResource,
-};
+export { createResource, getResources, updateResource, deleteResource };

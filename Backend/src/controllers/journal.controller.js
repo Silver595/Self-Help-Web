@@ -31,12 +31,16 @@ const getJournals = asyncHandler(async (req, res) => {
   ]);
 
   return res.status(200).json(
-    new ApiResponse(200, {
-      journals,
-      totalPages: Math.ceil(totalJournals / limit),
-      currentPage: page,
-      totalJournals,
-    }, 'Journal entries fetched successfully'),
+    new ApiResponse(
+      200,
+      {
+        journals,
+        totalPages: Math.ceil(totalJournals / limit),
+        currentPage: page,
+        totalJournals,
+      },
+      'Journal entries fetched successfully',
+    ),
   );
 });
 

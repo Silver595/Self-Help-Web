@@ -2,10 +2,7 @@ import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import { Session } from '../models/session.model.js';
 import { createSession, rotateSession } from '../services/session.service.js';
-import {
-  accessCookieOptions,
-  refreshCookieOptions,
-} from '../utils/cookies.js';
+import { accessCookieOptions, refreshCookieOptions } from '../utils/cookies.js';
 import { User, DUMMY_HASH } from '../models/user.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';

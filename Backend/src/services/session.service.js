@@ -10,7 +10,8 @@ import { Session } from '../models/session.model.js';
 const hashToken = (token) =>
   crypto.createHash('sha256').update(token).digest('hex');
 
-const refreshExpiry = () => new Date(Date.now() + toMs(env.REFRESH_TOKEN_EXPIRY));
+const refreshExpiry = () =>
+  new Date(Date.now() + toMs(env.REFRESH_TOKEN_EXPIRY));
 
 export const createSession = async (user, req) => {
   const session = new Session({
