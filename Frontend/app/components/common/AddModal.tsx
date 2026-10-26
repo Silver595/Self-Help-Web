@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { X, BookOpen, FileText, Plus, Sparkles } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, BookOpen, FileText, ChevronDown } from 'lucide-react';
 
 // ==========================================
 // TYPES & INTERFACES
 // ==========================================
 export type EntryType = 'book' | 'note';
+export type BookCategory = 'Productivity' | 'Focus' | 'Finance' | 'Philosophy';
 
 export interface NewBookData {
   title: string;
   author: string;
-  category: 'Productivity' | 'Focus' | 'Finance' | 'Philosophy';
+  category: BookCategory;
   pages: number;
 }
 
@@ -28,6 +29,46 @@ interface AddModalProps {
   defaultTab?: EntryType;
 }
 
+const CATEGORIES: BookCategory[] = [
+  'Productivity',
+  'Focus',
+  'Finance',
+  'Philosophy',
+];
+
+// ==========================================
+// SHARED STYLES
+// ==========================================
+const inputCls =
+  'w-full rounded-xl border border-neutral-300 bg-[#f1f1ef] px-4 py-3 text-[14px] text-neutral-900 placeholder:text-neutral-400 transition-colors focus:border-neutral-500 focus:outline-none focus:ring-2 focus:ring-[#ff3d00]/20';
+
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: 'Required' | 'Optional';
+  children: React.ReactNode;
+}) {
+  return (
+    <label className='block'>
+      <span className='block text-[13px] font-semibold text-neutral-900'>
+        {label}
+      </span>
+      {hint && (
+        <span className='mt-1.5 block text-[13px] text-neutral-400'>
+          {hint}
+        </span>
+      )}
+      <div className={hint ? 'mt-2' : 'mt-2.5'}>{children}</div>
+    </label>
+  );
+}
+
+// ==========================================
+// COMPONENT
+// ==========================================
 const AddModal: React.FC<AddModalProps> = ({
   isOpen,
   onClose,
@@ -37,241 +78,258 @@ const AddModal: React.FC<AddModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<EntryType>(defaultTab);
 
-  // Book Form State
+  // Book form
   const [bookTitle, setBookTitle] = useState('');
   const [bookAuthor, setBookAuthor] = useState('');
-  const [bookCategory, setBookCategory] = useState<
-    'Productivity' | 'Focus' | 'Finance' | 'Philosophy'
-  >('Productivity');
+  const [bookCategory, setBookCategory] =
+    useState<BookCategory>('Productivity');
   const [bookPages, setBookPages] = useState<number>(300);
 
-  // Note Form State
+  // Note form
   const [noteBookTitle, setNoteBookTitle] = useState('');
   const [noteQuote, setNoteQuote] = useState('');
   const [noteReflection, setNoteReflection] = useState('');
   const [noteTags, setNoteTags] = useState('');
 
+  // Esc to close + lock page scroll while open
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen, onClose]);
+
+  // Start on the requested tab each time it opens
+  useEffect(() => {
+    if (isOpen) setActiveTab(defaultTab);
+  }, [isOpen, defaultTab]);
+
   if (!isOpen) return null;
+
+  const resetForms = () => {
+    setBookTitle('');
+    setBookAuthor('');
+    setBookCategory('Productivity');
+    setBookPages(300);
+    setNoteBookTitle('');
+    setNoteQuote('');
+    setNoteReflection('');
+    setNoteTags('');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (activeTab === 'book') {
-      if (!bookTitle || !bookAuthor) return;
-      if (onSaveBook) {
-        onSaveBook({
-          title: bookTitle,
-          author: bookAuthor,
-          category: bookCategory,
-          pages: Number(bookPages),
-        });
-      }
+      if (!bookTitle.trim() || !bookAuthor.trim()) return;
+      onSaveBook?.({
+        title: bookTitle.trim(),
+        author: bookAuthor.trim(),
+        category: bookCategory,
+        pages: Number(bookPages),
+      });
     } else {
-      if (!noteQuote || !noteBookTitle) return;
-      if (onSaveNote) {
-        onSaveNote({
-          bookTitle: noteBookTitle,
-          quote: noteQuote,
-          reflection: noteReflection,
-          tags: noteTags,
-        });
-      }
+      if (!noteQuote.trim() || !noteBookTitle.trim()) return;
+      onSaveNote?.({
+        bookTitle: noteBookTitle.trim(),
+        quote: noteQuote.trim(),
+        reflection: noteReflection,
+        tags: noteTags,
+      });
     }
-    // Reset and close
+    resetForms();
     onClose();
   };
+
+  const tabCls = (tab: EntryType) =>
+    `flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em] transition-all ${
+      activeTab === tab
+        ? 'bg-white text-neutral-900 shadow-sm'
+        : 'text-neutral-500 hover:text-neutral-900'
+    }`;
 
   return (
     <div
       onClick={onClose}
-      className='fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn'
+      className='fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center sm:p-4'
     >
       <div
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-        className='bg-white rounded-2xl max-w-lg w-full p-6 space-y-6 shadow-2xl border border-[#EEEEEE]'
+        role='dialog'
+        aria-modal='true'
+        aria-labelledby='add-modal-title'
+        onClick={(e) => e.stopPropagation()}
+        className='flex max-h-[94vh] w-full max-w-[708px] flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl sm:max-h-[92vh] sm:rounded-[28px]'
       >
-        {/* Modal Header */}
-        <div className='flex justify-between items-center'>
-          <div className='flex items-center gap-2'>
-            <div>
-              <h3 className='text-lg font-bold text-[#171A20]'>
-                Add to Knowledge Vault
-              </h3>
-              <p className='text-xs text-[#5C5E62]'>
-                Log a new book or capture a key quote/note.
-              </p>
-            </div>
-          </div>
+        {/* Dark header */}
+        <div className='relative shrink-0 bg-[#434341] px-5 pb-6 pt-6 sm:px-7 sm:pb-8 sm:pt-7'>
+          <p className='font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-white'>
+            New entry
+          </p>
+          <h3
+            id='add-modal-title'
+            className='mt-3 pr-14 font-sans text-[28px] font-normal leading-tight text-white sm:text-[32px]'
+          >
+            Add to your library
+          </h3>
           <button
+            type='button'
+            aria-label='Close'
             onClick={onClose}
-            className='p-1.5 bg-[#F4F4F4] hover:bg-[#EEEEEE] rounded-full transition-all text-[#171A20]'
+            className='absolute right-5 top-5 grid h-11 w-11 cursor-pointer place-items-center rounded-xl border border-neutral-300 bg-white text-neutral-900 transition-colors hover:bg-neutral-100 sm:right-7 sm:top-7'
           >
-            <X className='w-4 h-4' />
+            <X className='h-5 w-5' />
           </button>
         </div>
 
-        {/* Tab Switcher */}
-        <div className='flex bg-[#EEEEEE]/70 p-1 rounded-lg border border-[#D0D1D2]/40'>
-          <button
-            type='button'
-            onClick={() => setActiveTab('book')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-semibold transition-all ${
-              activeTab === 'book'
-                ? 'bg-white text-[#171A20] shadow-sm'
-                : 'text-[#5C5E62] hover:text-[#171A20]'
-            }`}
-          >
-            <BookOpen className='w-3.5 h-3.5' /> New Book
-          </button>
-          <button
-            type='button'
-            onClick={() => setActiveTab('note')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-xs font-semibold transition-all ${
-              activeTab === 'note'
-                ? 'bg-white text-[#171A20] shadow-sm'
-                : 'text-[#5C5E62] hover:text-[#171A20]'
-            }`}
-          >
-            <FileText className='w-3.5 h-3.5' /> Quote / Note
-          </button>
-        </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className='flex min-h-0 flex-1 flex-col'>
+          <div className='flex-1 space-y-6 overflow-y-auto px-5 py-6 sm:px-7'>
+            {/* Tab switcher */}
+            <div className='flex rounded-xl bg-[#f1f1ef] p-1 ring-1 ring-neutral-300'>
+              <button
+                type='button'
+                onClick={() => setActiveTab('book')}
+                className={tabCls('book')}
+              >
+                <BookOpen className='h-3.5 w-3.5' /> New book
+              </button>
+              <button
+                type='button'
+                onClick={() => setActiveTab('note')}
+                className={tabCls('note')}
+              >
+                <FileText className='h-3.5 w-3.5' /> Quote / note
+              </button>
+            </div>
 
-        {/* Form Container */}
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          {activeTab === 'book' ? (
-            <>
-              <div className='space-y-1'>
-                <label className='text-xs font-semibold text-[#5C5E62]'>
-                  Book Title
-                </label>
-                <input
-                  type='text'
-                  required
-                  placeholder='e.g. Atomic Habits'
-                  value={bookTitle}
-                  onChange={(e) => setBookTitle(e.target.value)}
-                  className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
-                />
-              </div>
-
-              <div className='space-y-1'>
-                <label className='text-xs font-semibold text-[#5C5E62]'>
-                  Author
-                </label>
-                <input
-                  type='text'
-                  required
-                  placeholder='e.g. James Clear'
-                  value={bookAuthor}
-                  onChange={(e) => setBookAuthor(e.target.value)}
-                  className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
-                />
-              </div>
-
-              <div className='grid grid-cols-2 gap-4'>
-                <div className='space-y-1'>
-                  <label className='text-xs font-semibold text-[#5C5E62]'>
-                    Category
-                  </label>
-                  <select
-                    value={bookCategory}
-                    onChange={(e) => setBookCategory(e.target.value as any)}
-                    className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
-                  >
-                    <option value='Productivity'>Productivity</option>
-                    <option value='Focus'>Focus</option>
-                    <option value='Finance'>Finance</option>
-                    <option value='Philosophy'>Philosophy</option>
-                  </select>
-                </div>
-
-                <div className='space-y-1'>
-                  <label className='text-xs font-semibold text-[#5C5E62]'>
-                    Total Pages
-                  </label>
+            {activeTab === 'book' ? (
+              <>
+                <Field label='Book title' hint='Required'>
                   <input
-                    type='number'
-                    value={bookPages}
-                    onChange={(e) => setBookPages(Number(e.target.value))}
-                    className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
+                    type='text'
+                    required
+                    placeholder='e.g. Atomic Habits'
+                    value={bookTitle}
+                    onChange={(e) => setBookTitle(e.target.value)}
+                    className={inputCls}
                   />
+                </Field>
+
+                <Field label='Author' hint='Required'>
+                  <input
+                    type='text'
+                    required
+                    placeholder='e.g. James Clear'
+                    value={bookAuthor}
+                    onChange={(e) => setBookAuthor(e.target.value)}
+                    className={inputCls}
+                  />
+                </Field>
+
+                <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-3.5'>
+                  <Field label='Category'>
+                    <div className='relative'>
+                      <select
+                        value={bookCategory}
+                        onChange={(e) =>
+                          setBookCategory(e.target.value as BookCategory)
+                        }
+                        className={`${inputCls} cursor-pointer appearance-none pr-10`}
+                      >
+                        {CATEGORIES.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className='pointer-events-none absolute right-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-800' />
+                    </div>
+                  </Field>
+
+                  <Field label='Total pages'>
+                    <input
+                      type='number'
+                      min={1}
+                      value={bookPages}
+                      onChange={(e) => setBookPages(Number(e.target.value))}
+                      className={inputCls}
+                    />
+                  </Field>
                 </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className='space-y-1'>
-                <label className='text-xs font-semibold text-[#5C5E62]'>
-                  Book / Source Title
-                </label>
-                <input
-                  type='text'
-                  required
-                  placeholder='e.g. Deep Work'
-                  value={noteBookTitle}
-                  onChange={(e) => setNoteBookTitle(e.target.value)}
-                  className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
-                />
-              </div>
+              </>
+            ) : (
+              <>
+                <Field label='Book / source title' hint='Required'>
+                  <input
+                    type='text'
+                    required
+                    placeholder='e.g. Deep Work'
+                    value={noteBookTitle}
+                    onChange={(e) => setNoteBookTitle(e.target.value)}
+                    className={inputCls}
+                  />
+                </Field>
 
-              <div className='space-y-1'>
-                <label className='text-xs font-semibold text-[#5C5E62]'>
-                  Favorite Quote / Excerpt
-                </label>
-                <textarea
-                  required
-                  rows={2}
-                  placeholder='Paste the exact quote here...'
-                  value={noteQuote}
-                  onChange={(e) => setNoteQuote(e.target.value)}
-                  className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
-                />
-              </div>
+                <Field label='Favorite quote / excerpt' hint='Required'>
+                  <textarea
+                    required
+                    rows={3}
+                    placeholder='Paste the exact quote here...'
+                    value={noteQuote}
+                    onChange={(e) => setNoteQuote(e.target.value)}
+                    className={`${inputCls} resize-none`}
+                  />
+                </Field>
 
-              <div className='space-y-1'>
-                <label className='text-xs font-semibold text-[#5C5E62]'>
-                  Personal Reflection
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder='What does this mean for your daily routine?'
-                  value={noteReflection}
-                  onChange={(e) => setNoteReflection(e.target.value)}
-                  className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
-                />
-              </div>
+                <Field label='Personal reflection' hint='Optional'>
+                  <textarea
+                    rows={3}
+                    placeholder='What does this mean for your daily routine?'
+                    value={noteReflection}
+                    onChange={(e) => setNoteReflection(e.target.value)}
+                    className={`${inputCls} resize-none`}
+                  />
+                </Field>
 
-              <div className='space-y-1'>
-                <label className='text-xs font-semibold text-[#5C5E62]'>
-                  Tags (comma separated)
-                </label>
-                <input
-                  type='text'
-                  placeholder='e.g. Systems, Focus'
-                  value={noteTags}
-                  onChange={(e) => setNoteTags(e.target.value)}
-                  className='w-full bg-[#F4F4F4] border border-[#D0D1D2] rounded-lg px-3 py-2 text-sm text-[#171A20] focus:outline-none focus:border-[#3E6AE1]'
-                />
-              </div>
-            </>
-          )}
+                <Field label='Tags' hint='Optional'>
+                  <input
+                    type='text'
+                    placeholder='e.g. Systems, Focus (comma separated)'
+                    value={noteTags}
+                    onChange={(e) => setNoteTags(e.target.value)}
+                    className={inputCls}
+                  />
+                </Field>
+              </>
+            )}
 
-          {/* Action Buttons */}
-          <div className='flex justify-end gap-2 pt-4 border-t border-[#EEEEEE]'>
-            <button
-              type='button'
-              onClick={onClose}
-              className='px-4 py-2 bg-[#F4F4F4] hover:bg-[#EEEEEE] text-[#171A20] rounded-lg text-sm font-medium transition-all'
-            >
-              Cancel
-            </button>
-            <button
-              type='submit'
-              className='flex items-center gap-1.5 px-4 py-2 bg-[#171A20] hover:bg-[#393C41] text-white rounded-lg text-sm font-medium transition-all shadow-sm'
-            >
-              Save {activeTab === 'book' ? 'Book' : 'Note'}
-            </button>
+            <p className='font-mono text-[11px] leading-relaxed text-neutral-500'>
+              Everything you add stays in your personal library. You can edit it
+              later.
+            </p>
+          </div>
+
+          {/* Footer actions */}
+          <div className='shrink-0 border-t border-neutral-200 px-5 py-4 sm:mx-7 sm:px-0 sm:py-5'>
+            <div className='flex justify-end gap-3'>
+              <button
+                type='button'
+                onClick={onClose}
+                className='h-12 cursor-pointer rounded-xl border border-neutral-300 bg-white px-6 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-neutral-900 transition-colors hover:bg-neutral-100'
+              >
+                Cancel
+              </button>
+              <button
+                type='submit'
+                className='h-12 cursor-pointer rounded-xl bg-[#ff3d00] px-6 font-mono text-[12px] font-bold uppercase tracking-[0.12em] text-white transition-colors hover:bg-[#e03600]'
+              >
+                Save {activeTab === 'book' ? 'book' : 'note'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
