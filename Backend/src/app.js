@@ -44,7 +44,7 @@ app.get('/ready', (_req, res) => {
 
 app.use(
   cors({
-    origin: env.CORS_ORIGIN.split(','),
+    origin: true,
     credentials: true,
   }),
 );
@@ -88,6 +88,11 @@ import journalRouter from './routes/journal.routes.js';
 
 app.use('/api/v1/journals', journalRouter);
 
+// pdf routes
+import { pdfRouter, resourcePdfRouter } from './routes/pdf.routes.js';
+
+app.use('/api/pdfs', pdfRouter);
+app.use('/api/resources/:resourceId/pdf', resourcePdfRouter);
 import dashboardRouter from './routes/dashboard.routes.js';
 
 app.use('/api/v1/dashboard', dashboardRouter);

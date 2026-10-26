@@ -24,6 +24,7 @@ export const getCurrentUser = (): Promise<User> => {
     currentUserRequest = api<User>('/users/current-user').finally(
       () => {
         currentUserRequest = null;
+        
       },
     );
   }

@@ -226,6 +226,486 @@ const Dashboard = () => {
           </button>
         </section>
       </div>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        {/* LEFT COLUMN: BOOKS & NOTES LIBRARY (2 COLUMNS WIDE) */}
+        <section className='lg:col-span-2 bg-white rounded-xl p-6 border border-[#EEEEEE] shadow-sm space-y-6'>
+          <div className='flex items-center justify-between border-b border-[#EEEEEE] pb-4'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-[#F4F4F4] rounded-md'>
+                <BookOpen className='w-5 h-5 text-[#171A20]' />
+              </div>
+              <div>
+                <h2 className='text-lg font-bold text-[#171A20]'>
+                  Library & Notes
+                </h2>
+                <p className='text-xs text-[#5C5E62]'>
+                  Track active reads, quotes & book summaries
+                </p>
+              </div>
+            </div>
+            <SecoundaryButton
+              content='Add Note'
+              onClick={() => setIsAddBookModalOpen(true)}
+              addPlus
+            />
+          </div>
+
+          {/* Book Cards Grid */}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {books.map((book) => (
+              <div
+                key={book.id}
+                className='p-4 border border-[#EEEEEE] rounded-lg bg-[#FAFAFA] hover:border-[#D0D1D2] transition-all space-y-3'
+              >
+                <div className='flex justify-between items-start'>
+                  <div>
+                    <span className='text-[10px] font-bold uppercase tracking-wider text-[#3E6AE1] bg-[#3E6AE1]/10 px-2 py-0.5 rounded'>
+                      {book.category}
+                    </span>
+                    <h3 className='font-semibold text-base mt-2 text-[#171A20]'>
+                      {book.title}
+                    </h3>
+                    <p className='text-xs text-[#5C5E62]'>{book.author}</p>
+                  </div>
+                  <Bookmark className='w-4 h-4 text-[#5C5E62] hover:text-[#171A20] cursor-pointer' />
+                </div>
+
+                {/* Progress Bar */}
+                <div className='space-y-1'>
+                  <div className='flex justify-between text-xs text-[#5C5E62]'>
+                    <span>Progress</span>
+                    <span>{book.progress}%</span>
+                  </div>
+                  <div className='w-full bg-[#EEEEEE] h-1.5 rounded-full overflow-hidden'>
+                    <div
+                      className='bg-[#171A20] h-full rounded-full transition-all'
+                      style={{ width: `${book.progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button className='w-full text-center text-xs font-semibold text-[#3E6AE1] hover:underline flex items-center justify-center gap-1 pt-2'>
+            View All Books & Notes <ChevronRight className='w-3 h-3' />
+          </button>
+        </section>
+
+        {/* RIGHT COLUMN: EXPENSE TRACKER (1 COLUMN WIDE) */}
+        <section className='bg-white rounded-xl p-6 border border-[#EEEEEE] shadow-sm space-y-6'>
+          <div className='flex items-center justify-between border-b border-[#EEEEEE] pb-4'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-[#F4F4F4] rounded-md'>
+                <Wallet className='w-5 h-5 text-[#171A20]' />
+              </div>
+              <div>
+                <h2 className='text-lg font-bold text-[#171A20]'>Expenses</h2>
+                <p className='text-xs text-[#5C5E62]'>Monthly overview</p>
+              </div>
+            </div>
+
+            <button className='p-1.5 bg-[#F4F4F4] hover:bg-[#EEEEEE] rounded-md transition-all'>
+              <Plus className='w-4 h-4 text-[#171A20]' />
+            </button>
+          </div>
+
+          {/* Total Spend Banner */}
+          <div className='p-4 bg-[#171A20] text-white rounded-lg space-y-1'>
+            <p className='text-xs text-[#D0D1D2]'>Total Spent (Oct)</p>
+            <p className='text-2xl font-bold'>
+              ${totalSpentThisMonth.toFixed(2)}
+            </p>
+          </div>
+
+          {/* Recent Expense List */}
+          <div className='space-y-3'>
+            <p className='text-xs font-bold text-[#5C5E62] uppercase tracking-wider'>
+              Recent Transactions
+            </p>
+            {expenses.map((item) => (
+              <div
+                key={item.id}
+                className='flex justify-between items-center text-sm py-2 border-b border-[#EEEEEE] last:border-0'
+              >
+                <div>
+                  <p className='font-medium text-[#171A20]'>{item.title}</p>
+                  <p className='text-xs text-[#5C5E62]'>
+                    {item.date} • {item.category}
+                  </p>
+                </div>
+                <span className='font-semibold text-[#171A20]'>
+                  -${item.amount.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <button className='w-full text-center text-xs font-semibold text-[#3E6AE1] hover:underline flex items-center justify-center gap-1 pt-2'>
+            Full Expense Logs <ChevronRight className='w-3 h-3' />
+          </button>
+        </section>
+      </div>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        {/* LEFT COLUMN: BOOKS & NOTES LIBRARY (2 COLUMNS WIDE) */}
+        <section className='lg:col-span-2 bg-white rounded-xl p-6 border border-[#EEEEEE] shadow-sm space-y-6'>
+          <div className='flex items-center justify-between border-b border-[#EEEEEE] pb-4'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-[#F4F4F4] rounded-md'>
+                <BookOpen className='w-5 h-5 text-[#171A20]' />
+              </div>
+              <div>
+                <h2 className='text-lg font-bold text-[#171A20]'>
+                  Library & Notes
+                </h2>
+                <p className='text-xs text-[#5C5E62]'>
+                  Track active reads, quotes & book summaries
+                </p>
+              </div>
+            </div>
+            <SecoundaryButton
+              content='Add Note'
+              onClick={() => setIsAddBookModalOpen(true)}
+              addPlus
+            />
+          </div>
+
+          {/* Book Cards Grid */}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {books.map((book) => (
+              <div
+                key={book.id}
+                className='p-4 border border-[#EEEEEE] rounded-lg bg-[#FAFAFA] hover:border-[#D0D1D2] transition-all space-y-3'
+              >
+                <div className='flex justify-between items-start'>
+                  <div>
+                    <span className='text-[10px] font-bold uppercase tracking-wider text-[#3E6AE1] bg-[#3E6AE1]/10 px-2 py-0.5 rounded'>
+                      {book.category}
+                    </span>
+                    <h3 className='font-semibold text-base mt-2 text-[#171A20]'>
+                      {book.title}
+                    </h3>
+                    <p className='text-xs text-[#5C5E62]'>{book.author}</p>
+                  </div>
+                  <Bookmark className='w-4 h-4 text-[#5C5E62] hover:text-[#171A20] cursor-pointer' />
+                </div>
+
+                {/* Progress Bar */}
+                <div className='space-y-1'>
+                  <div className='flex justify-between text-xs text-[#5C5E62]'>
+                    <span>Progress</span>
+                    <span>{book.progress}%</span>
+                  </div>
+                  <div className='w-full bg-[#EEEEEE] h-1.5 rounded-full overflow-hidden'>
+                    <div
+                      className='bg-[#171A20] h-full rounded-full transition-all'
+                      style={{ width: `${book.progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button className='w-full text-center text-xs font-semibold text-[#3E6AE1] hover:underline flex items-center justify-center gap-1 pt-2'>
+            View All Books & Notes <ChevronRight className='w-3 h-3' />
+          </button>
+        </section>
+
+        {/* RIGHT COLUMN: EXPENSE TRACKER (1 COLUMN WIDE) */}
+        <section className='bg-white rounded-xl p-6 border border-[#EEEEEE] shadow-sm space-y-6'>
+          <div className='flex items-center justify-between border-b border-[#EEEEEE] pb-4'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-[#F4F4F4] rounded-md'>
+                <Wallet className='w-5 h-5 text-[#171A20]' />
+              </div>
+              <div>
+                <h2 className='text-lg font-bold text-[#171A20]'>Expenses</h2>
+                <p className='text-xs text-[#5C5E62]'>Monthly overview</p>
+              </div>
+            </div>
+
+            <button className='p-1.5 bg-[#F4F4F4] hover:bg-[#EEEEEE] rounded-md transition-all'>
+              <Plus className='w-4 h-4 text-[#171A20]' />
+            </button>
+          </div>
+
+          {/* Total Spend Banner */}
+          <div className='p-4 bg-[#171A20] text-white rounded-lg space-y-1'>
+            <p className='text-xs text-[#D0D1D2]'>Total Spent (Oct)</p>
+            <p className='text-2xl font-bold'>
+              ${totalSpentThisMonth.toFixed(2)}
+            </p>
+          </div>
+
+          {/* Recent Expense List */}
+          <div className='space-y-3'>
+            <p className='text-xs font-bold text-[#5C5E62] uppercase tracking-wider'>
+              Recent Transactions
+            </p>
+            {expenses.map((item) => (
+              <div
+                key={item.id}
+                className='flex justify-between items-center text-sm py-2 border-b border-[#EEEEEE] last:border-0'
+              >
+                <div>
+                  <p className='font-medium text-[#171A20]'>{item.title}</p>
+                  <p className='text-xs text-[#5C5E62]'>
+                    {item.date} • {item.category}
+                  </p>
+                </div>
+                <span className='font-semibold text-[#171A20]'>
+                  -${item.amount.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <button className='w-full text-center text-xs font-semibold text-[#3E6AE1] hover:underline flex items-center justify-center gap-1 pt-2'>
+            Full Expense Logs <ChevronRight className='w-3 h-3' />
+          </button>
+        </section>
+      </div>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        {/* LEFT COLUMN: BOOKS & NOTES LIBRARY (2 COLUMNS WIDE) */}
+        <section className='lg:col-span-2 bg-white rounded-xl p-6 border border-[#EEEEEE] shadow-sm space-y-6'>
+          <div className='flex items-center justify-between border-b border-[#EEEEEE] pb-4'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-[#F4F4F4] rounded-md'>
+                <BookOpen className='w-5 h-5 text-[#171A20]' />
+              </div>
+              <div>
+                <h2 className='text-lg font-bold text-[#171A20]'>
+                  Library & Notes
+                </h2>
+                <p className='text-xs text-[#5C5E62]'>
+                  Track active reads, quotes & book summaries
+                </p>
+              </div>
+            </div>
+            <SecoundaryButton
+              content='Add Note'
+              onClick={() => setIsAddBookModalOpen(true)}
+              addPlus
+            />
+          </div>
+
+          {/* Book Cards Grid */}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {books.map((book) => (
+              <div
+                key={book.id}
+                className='p-4 border border-[#EEEEEE] rounded-lg bg-[#FAFAFA] hover:border-[#D0D1D2] transition-all space-y-3'
+              >
+                <div className='flex justify-between items-start'>
+                  <div>
+                    <span className='text-[10px] font-bold uppercase tracking-wider text-[#3E6AE1] bg-[#3E6AE1]/10 px-2 py-0.5 rounded'>
+                      {book.category}
+                    </span>
+                    <h3 className='font-semibold text-base mt-2 text-[#171A20]'>
+                      {book.title}
+                    </h3>
+                    <p className='text-xs text-[#5C5E62]'>{book.author}</p>
+                  </div>
+                  <Bookmark className='w-4 h-4 text-[#5C5E62] hover:text-[#171A20] cursor-pointer' />
+                </div>
+
+                {/* Progress Bar */}
+                <div className='space-y-1'>
+                  <div className='flex justify-between text-xs text-[#5C5E62]'>
+                    <span>Progress</span>
+                    <span>{book.progress}%</span>
+                  </div>
+                  <div className='w-full bg-[#EEEEEE] h-1.5 rounded-full overflow-hidden'>
+                    <div
+                      className='bg-[#171A20] h-full rounded-full transition-all'
+                      style={{ width: `${book.progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button className='w-full text-center text-xs font-semibold text-[#3E6AE1] hover:underline flex items-center justify-center gap-1 pt-2'>
+            View All Books & Notes <ChevronRight className='w-3 h-3' />
+          </button>
+        </section>
+
+        {/* RIGHT COLUMN: EXPENSE TRACKER (1 COLUMN WIDE) */}
+        <section className='bg-white rounded-xl p-6 border border-[#EEEEEE] shadow-sm space-y-6'>
+          <div className='flex items-center justify-between border-b border-[#EEEEEE] pb-4'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-[#F4F4F4] rounded-md'>
+                <Wallet className='w-5 h-5 text-[#171A20]' />
+              </div>
+              <div>
+                <h2 className='text-lg font-bold text-[#171A20]'>Expenses</h2>
+                <p className='text-xs text-[#5C5E62]'>Monthly overview</p>
+              </div>
+            </div>
+
+            <button className='p-1.5 bg-[#F4F4F4] hover:bg-[#EEEEEE] rounded-md transition-all'>
+              <Plus className='w-4 h-4 text-[#171A20]' />
+            </button>
+          </div>
+
+          {/* Total Spend Banner */}
+          <div className='p-4 bg-[#171A20] text-white rounded-lg space-y-1'>
+            <p className='text-xs text-[#D0D1D2]'>Total Spent (Oct)</p>
+            <p className='text-2xl font-bold'>
+              ${totalSpentThisMonth.toFixed(2)}
+            </p>
+          </div>
+
+          {/* Recent Expense List */}
+          <div className='space-y-3'>
+            <p className='text-xs font-bold text-[#5C5E62] uppercase tracking-wider'>
+              Recent Transactions
+            </p>
+            {expenses.map((item) => (
+              <div
+                key={item.id}
+                className='flex justify-between items-center text-sm py-2 border-b border-[#EEEEEE] last:border-0'
+              >
+                <div>
+                  <p className='font-medium text-[#171A20]'>{item.title}</p>
+                  <p className='text-xs text-[#5C5E62]'>
+                    {item.date} • {item.category}
+                  </p>
+                </div>
+                <span className='font-semibold text-[#171A20]'>
+                  -${item.amount.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <button className='w-full text-center text-xs font-semibold text-[#3E6AE1] hover:underline flex items-center justify-center gap-1 pt-2'>
+            Full Expense Logs <ChevronRight className='w-3 h-3' />
+          </button>
+        </section>
+      </div>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        {/* LEFT COLUMN: BOOKS & NOTES LIBRARY (2 COLUMNS WIDE) */}
+        <section className='lg:col-span-2 bg-white rounded-xl p-6 border border-[#EEEEEE] shadow-sm space-y-6'>
+          <div className='flex items-center justify-between border-b border-[#EEEEEE] pb-4'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-[#F4F4F4] rounded-md'>
+                <BookOpen className='w-5 h-5 text-[#171A20]' />
+              </div>
+              <div>
+                <h2 className='text-lg font-bold text-[#171A20]'>
+                  Library & Notes
+                </h2>
+                <p className='text-xs text-[#5C5E62]'>
+                  Track active reads, quotes & book summaries
+                </p>
+              </div>
+            </div>
+            <SecoundaryButton
+              content='Add Note'
+              onClick={() => setIsAddBookModalOpen(true)}
+              addPlus
+            />
+          </div>
+
+          {/* Book Cards Grid */}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {books.map((book) => (
+              <div
+                key={book.id}
+                className='p-4 border border-[#EEEEEE] rounded-lg bg-[#FAFAFA] hover:border-[#D0D1D2] transition-all space-y-3'
+              >
+                <div className='flex justify-between items-start'>
+                  <div>
+                    <span className='text-[10px] font-bold uppercase tracking-wider text-[#3E6AE1] bg-[#3E6AE1]/10 px-2 py-0.5 rounded'>
+                      {book.category}
+                    </span>
+                    <h3 className='font-semibold text-base mt-2 text-[#171A20]'>
+                      {book.title}
+                    </h3>
+                    <p className='text-xs text-[#5C5E62]'>{book.author}</p>
+                  </div>
+                  <Bookmark className='w-4 h-4 text-[#5C5E62] hover:text-[#171A20] cursor-pointer' />
+                </div>
+
+                {/* Progress Bar */}
+                <div className='space-y-1'>
+                  <div className='flex justify-between text-xs text-[#5C5E62]'>
+                    <span>Progress</span>
+                    <span>{book.progress}%</span>
+                  </div>
+                  <div className='w-full bg-[#EEEEEE] h-1.5 rounded-full overflow-hidden'>
+                    <div
+                      className='bg-[#171A20] h-full rounded-full transition-all'
+                      style={{ width: `${book.progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button className='w-full text-center text-xs font-semibold text-[#3E6AE1] hover:underline flex items-center justify-center gap-1 pt-2'>
+            View All Books & Notes <ChevronRight className='w-3 h-3' />
+          </button>
+        </section>
+
+        {/* RIGHT COLUMN: EXPENSE TRACKER (1 COLUMN WIDE) */}
+        <section className='bg-white rounded-xl p-6 border border-[#EEEEEE] shadow-sm space-y-6'>
+          <div className='flex items-center justify-between border-b border-[#EEEEEE] pb-4'>
+            <div className='flex items-center gap-3'>
+              <div className='p-2 bg-[#F4F4F4] rounded-md'>
+                <Wallet className='w-5 h-5 text-[#171A20]' />
+              </div>
+              <div>
+                <h2 className='text-lg font-bold text-[#171A20]'>Expenses</h2>
+                <p className='text-xs text-[#5C5E62]'>Monthly overview</p>
+              </div>
+            </div>
+
+            <button className='p-1.5 bg-[#F4F4F4] hover:bg-[#EEEEEE] rounded-md transition-all'>
+              <Plus className='w-4 h-4 text-[#171A20]' />
+            </button>
+          </div>
+
+          {/* Total Spend Banner */}
+          <div className='p-4 bg-[#171A20] text-white rounded-lg space-y-1'>
+            <p className='text-xs text-[#D0D1D2]'>Total Spent (Oct)</p>
+            <p className='text-2xl font-bold'>
+              ${totalSpentThisMonth.toFixed(2)}
+            </p>
+          </div>
+
+          {/* Recent Expense List */}
+          <div className='space-y-3'>
+            <p className='text-xs font-bold text-[#5C5E62] uppercase tracking-wider'>
+              Recent Transactions
+            </p>
+            {expenses.map((item) => (
+              <div
+                key={item.id}
+                className='flex justify-between items-center text-sm py-2 border-b border-[#EEEEEE] last:border-0'
+              >
+                <div>
+                  <p className='font-medium text-[#171A20]'>{item.title}</p>
+                  <p className='text-xs text-[#5C5E62]'>
+                    {item.date} • {item.category}
+                  </p>
+                </div>
+                <span className='font-semibold text-[#171A20]'>
+                  -${item.amount.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <button className='w-full text-center text-xs font-semibold text-[#3E6AE1] hover:underline flex items-center justify-center gap-1 pt-2'>
+            Full Expense Logs <ChevronRight className='w-3 h-3' />
+          </button>
+        </section>
+      </div>
 
       {/* 3. BOTTOM SECTION: HABITS & SAVED REELS (PLACEHOLDERS) */}
       <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
