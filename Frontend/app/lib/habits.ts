@@ -87,6 +87,27 @@ export interface HabitProgressResponse {
   log: HabitLog;
   completed: boolean;
 }
+
+export interface HabitDayStat {
+  date: string;
+  scheduled: boolean;
+  value: number;
+  completed: boolean;
+}
+
+export interface HabitStats {
+  from: string;
+  to: string;
+  scheduledDays: number;
+  completedDays: number;
+  completionRate: number;
+  currentStreak: number;
+  longestStreak: number;
+  days: HabitDayStat[];
+}
+
+
+
 export type UpdateHabitInput =
   Partial<Omit<CreateHabitInput, 'schedule' | 'target' | 'reminder'>> & {
     schedule?: Partial<CreateHabitInput['schedule']>;
@@ -141,6 +162,23 @@ export type UpdateHabitInput =
     });
   }
 
+
+  export function getHabitStats(
+    id: string,
+    from?: string,
+    to?: string,
+  ) {
+    const params = new URLSearchParams();
+
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+
+    const query = params.toString();
+
+    return api<HabitStats>(
+      `/habits/${id}/stats${query ? `?${query}` : ''}`,
+    );
+  }
 
 
   export function getArchivedHabits() {
