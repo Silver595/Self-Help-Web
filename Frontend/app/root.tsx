@@ -2,12 +2,11 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
-  Outlet,
   Scripts,
-  ScrollRestoration,
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import PageTransition from "~/components/common/PageTransition";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -34,7 +33,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <ScrollRestoration />
         <Scripts />
       </body>
     </html>
@@ -42,7 +40,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return <PageTransition />;
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
