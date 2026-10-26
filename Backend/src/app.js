@@ -10,6 +10,12 @@ import morgan from 'morgan';
 import { apiLimiter } from './middlewares/rateLimit.middleware.js';
 
 const app = express();
+app.set('trust proxy', 1);
+
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+})
 
 app.use(helmet());
 app.use(
@@ -39,7 +45,7 @@ app.get('/ready', (_req, res) => {
 app.use(
   cors({
     origin: env.CORS_ORIGIN.split(','),
-    credentials: false,
+    credentials: true,
   }),
 );
 
@@ -55,7 +61,6 @@ app.use(
     limit: '16kb',
   }),
 );
-app.use(express.static('public'));
 
 app.use(cookieParser());
 app.use('/api', apiLimiter);
@@ -68,7 +73,7 @@ app.use('/api/v1/users', userRouter);
 
 import resourceRouter from './routes/resource.routes.js';
 
-// Mount under your API version prefix00000
+// Mount under your API version prefix
 app.use('/api/v1/resources', resourceRouter);
 
 import habitRouter from './routes/habit.routes.js';
@@ -83,24 +88,46 @@ import journalRouter from './routes/journal.routes.js';
 
 app.use('/api/v1/journals', journalRouter);
 
+import dashboardRouter from './routes/dashboard.routes.js';
+
+app.use('/api/v1/dashboard', dashboardRouter);
+
 app.use((req, _res, next) => {
   next(new ApiError(404, `Path not found: ${req.method} ${req.originalUrl}`));
 });
 
-app.use((err, _req, res, next) => {
+app.use((err, _req, res, _next) => {
+  let error = err;
+
   if (err.code === 11000) {
-    err = new ApiError(409, 'Duplicate value: already exists');
+    error = new ApiError(409, 'Duplicate value: already exists');
+  } else if (err.name === 'ValidationError') {
+    // Mongoose schema validation failed (e.g. a value not in an enum)
+    const errors = Object.values(err.errors).map((e) => ({
+      field: e.path,
+      message: e.message,
+    }));
+    error = new ApiError(
+      400,
+      errors[0]?.message || 'Validation failed',
+      errors,
+    );
+  } else if (err.name === 'CastError') {
+    error = new ApiError(400, 'Invalid value for ' + err.path);
   }
 
-  const statusCode = err.statusCode || err.status || 500;
-  const Prod = process.env.NODE_ENV === 'production';
+  const statusCode = error.statusCode || error.status || 500;
+  const isProd = env.NODE_ENV === 'production';
+
+  if (statusCode >= 500) console.error(err); // unexpected errors always get logged
 
   res.status(statusCode).json({
     statusCode,
     success: false,
-    message: statusCode === 500 && Prod ? 'Internal Server Error' : err.message,
-    errors: err.errors || [],
-    ...(Prod ? {} : { stack: err.stack }),
+    message:
+      statusCode === 500 && isProd ? 'Internal Server Error' : error.message,
+    errors: error.errors || [],
+    ...(isProd ? {} : { stack: err.stack }),
   });
 });
 

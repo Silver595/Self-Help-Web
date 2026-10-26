@@ -1,8 +1,35 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router/internal/react-server-client';
+import { Link, NavLink, useNavigate } from 'react-router';
+import { logoutRequest } from '~/lib/auth';
+import { ApiRequestError } from '~/lib/api';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+
+      // The backend successfully destroyed the session.
+      navigate('/login', { replace: true });
+    } catch (error) {
+      if (
+        error instanceof ApiRequestError &&
+        error.status === 401
+      ) {
+        // The session is already invalid.
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      console.error('Logout failed:', error);
+
+      window.alert(
+        'Logout could not be completed. Please try again.',
+      );
+    }
+  };
 
   const navLinks = [
     { to: '/dashboard', label: 'Dashboard' },
@@ -17,7 +44,7 @@ const Header = () => {
       <nav className='mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6'>
         {/* Logo / Brand */}
         <Link
-          to='/'
+          to='/dashboard'
           className='text-[15px] font-medium tracking-tight text-[#171A20]'
         >
           Growth OS
@@ -38,6 +65,12 @@ const Header = () => {
               {link.label}
             </NavLink>
           ))}
+          <button
+            onClick={handleLogout}
+            className='text-[#393C41] hover:text-[#171A20]'
+          >
+            Logout
+          </button>
         </div>
 
         {/* Mobile Hamburger Button */}
@@ -90,6 +123,12 @@ const Header = () => {
               {link.label}
             </NavLink>
           ))}
+          <button
+            onClick={handleLogout}
+            className='text-left text-base font-medium text-[#393C41] hover:text-[#171A20]'
+          >
+            Logout
+          </button>
         </div>
       )}
     </header>

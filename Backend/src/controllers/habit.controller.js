@@ -10,26 +10,6 @@ import {
   getStats,
   deleteWithHistory,
 } from '../services/habit.service.js';
-import {
-  createHabitSchema,
-  updateHabitSchema,
-  logSchema,
-  statsQuerySchema,
-  listQuerySchema,
-} from '../validators/habit.validator.js';
-
-// Validate with Zod and return the clean data, or throw a 400
-const parse = (schema, data) => {
-  const result = schema.safeParse(data ?? {});
-  if (!result.success) {
-    throw new ApiError(
-      400,
-      result.error.issues[0]?.message || 'Invalid request data',
-    );
-  }
-  return result.data;
-};
-
 // Turn database errors into clean API errors
 const rethrowWriteError = (error) => {
   if (error?.code === 11000) {
@@ -45,16 +25,8 @@ const rethrowWriteError = (error) => {
 const NESTED_FIELDS = ['schedule', 'target', 'reminder'];
 
 export const createHabit = asyncHandler(async (req, res) => {
-  const data = parse(createHabitSchema, req.body);
-  // Check for duplicate habit title for this user
-  const existingHabit = await Habit.findOne({
-    user: req.user._id,
-    title: data.title,
-  });
-
-  if (existingHabit) {
-    throw new ApiError(409, 'You already have a habit with this title');
-  }
+  const data = req.body; // already validated by the route
+  // duplicate titles are caught by the case-insensitive unique index (-> 409)
 
   try {
     const habit = await Habit.create({ ...data, user: req.user._id });
@@ -67,7 +39,7 @@ export const createHabit = asyncHandler(async (req, res) => {
 });
 
 export const getHabits = asyncHandler(async (req, res) => {
-  const { tag, archived } = parse(listQuerySchema, req.query);
+  const { tag, archived } = req.validQuery;
 
   const filter = { user: req.user._id, isArchived: archived === 'true' };
   if (tag) filter.tags = tag;
@@ -98,7 +70,7 @@ export const getHabit = asyncHandler(async (req, res) => {
 });
 
 export const updateHabit = asyncHandler(async (req, res) => {
-  const data = parse(updateHabitSchema, req.body);
+  const data = req.body;
   if (Object.keys(data).length === 0)
     throw new ApiError(400, 'Nothing to update');
 
@@ -150,7 +122,7 @@ export const deleteHabit = asyncHandler(async (req, res) => {
 });
 
 export const setHabitLog = asyncHandler(async (req, res) => {
-  const { value, note } = parse(logSchema, req.body);
+  const { value, note } = req.body;
   const { habit, log, completed } = await logProgress(
     req.params.id,
     req.user._id,
@@ -170,7 +142,7 @@ export const deleteHabitLog = asyncHandler(async (req, res) => {
 });
 
 export const getHabitStats = asyncHandler(async (req, res) => {
-  const { from, to } = parse(statsQuerySchema, req.query);
+  const { from, to } = req.validQuery;
   const stats = await getStats(req.params.id, req.user._id, from, to);
   return res
     .status(200)

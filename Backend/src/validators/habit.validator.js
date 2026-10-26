@@ -1,11 +1,9 @@
 import { z } from 'zod';
 import { TIME_RE, isValidDateString } from '../utils/HabitDate.js';
 
-const dateString = z
-  .string()
-  .refine(isValidDateString, {
-    message: 'Date must be a real date in YYYY-MM-DD format',
-  });
+const dateString = z.string().refine(isValidDateString, {
+  message: 'Date must be a real date in YYYY-MM-DD format',
+});
 
 // Zod strips keys that aren't listed, so a client can never set
 // user, currentStreak, longestStreak, etc. through these schemas.
@@ -52,7 +50,14 @@ export const createHabitSchema = z.object({
 });
 
 // Every field optional for PATCH
-export const updateHabitSchema = createHabitSchema.partial();
+export const updateHabitSchema = createHabitSchema
+  .extend({
+    // .partial() is shallow, so make the nested objects partial too
+    schedule: createHabitSchema.shape.schedule.unwrap().partial().optional(),
+    target: createHabitSchema.shape.target.unwrap().partial().optional(),
+    reminder: createHabitSchema.shape.reminder.unwrap().partial().optional(),
+  })
+  .partial();
 
 export const logSchema = z.object({
   value: z.number().positive('Value must be greater than 0').default(1),

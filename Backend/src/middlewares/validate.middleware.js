@@ -1,14 +1,21 @@
 import { ApiError } from '../utils/ApiError.js';
 
+// zod says "expected string, received undefined" for a missing field.
+// Turn that into "title is required".
+const friendly = (issue) =>
+  issue.code === 'invalid_type' && /received undefined/.test(issue.message)
+    ? issue.path.join('.') + ' is required'
+    : issue.message;
+
 export const validate =
   (schema, source = 'body') =>
   (req, _res, next) => {
-    const result = schema.safeParse(req[source]);
+    const result = schema.safeParse(req[source] ?? {});
 
     if (!result.success) {
       const errors = result.error.issues.map((i) => ({
         field: i.path.join('.'),
-        message: i.message,
+        message: friendly(i),
       }));
       return next(new ApiError(400, errors[0].message, errors));
     }

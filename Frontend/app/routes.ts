@@ -6,20 +6,20 @@ import {
 } from '@react-router/dev/routes';
 
 export default [
-  // Public Standalone Pages (No AppLayout wrapper)
-  index('routes/home.tsx'),
-  route('login', 'routes/login.tsx'),
-  route('signup', 'routes/signup.tsx'),
+  // Public pages: landing, login, signup
+  // Authenticated users are redirected to the dashboard.
+  layout('layouts/GuestLayout.tsx', [
+    index('routes/home.tsx'),
+    route('login', 'routes/login.tsx'),
+    route('signup', 'routes/signup.tsx'),
+  ]),
 
-  // Authenticated App Pages (Wrapped in AppLayout)
+  // Protected pages: authentication is checked by AppLayout.
   layout('layouts/AppLayout.tsx', [
     route('dashboard', 'routes/dashboard.tsx'),
-    // route('habits', 'routes/habits.tsx'),
     route('library', 'routes/library.tsx'),
-    // route('expenses', 'routes/expenses.tsx'),
-    // route('inspiration', 'routes/inspiration.tsx'),
-    
-    // Catch-all route for features under construction or non-existent routes
+
+    // Existing fallback for unfinished features.
     route('*', 'components/ComingSoon.tsx'),
   ]),
 ] satisfies RouteConfig;
