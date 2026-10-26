@@ -10,6 +10,12 @@ import morgan from 'morgan';
 import { apiLimiter } from './middlewares/rateLimit.middleware.js';
 
 const app = express();
+app.set('trust proxy', 1);
+
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+})
 
 app.use(helmet());
 app.use(
@@ -87,6 +93,9 @@ import { pdfRouter, resourcePdfRouter } from './routes/pdf.routes.js';
 
 app.use('/api/pdfs', pdfRouter);
 app.use('/api/resources/:resourceId/pdf', resourcePdfRouter);
+import dashboardRouter from './routes/dashboard.routes.js';
+
+app.use('/api/v1/dashboard', dashboardRouter);
 
 app.use((req, _res, next) => {
   next(new ApiError(404, `Path not found: ${req.method} ${req.originalUrl}`));
@@ -103,7 +112,11 @@ app.use((err, _req, res, _next) => {
       field: e.path,
       message: e.message,
     }));
-    error = new ApiError(400, errors[0]?.message || 'Validation failed', errors);
+    error = new ApiError(
+      400,
+      errors[0]?.message || 'Validation failed',
+      errors,
+    );
   } else if (err.name === 'CastError') {
     error = new ApiError(400, 'Invalid value for ' + err.path);
   }

@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
-import { Search, Plus, Bell, Moon, Sun } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router';
+import { logoutRequest } from '~/lib/auth';
+import { ApiRequestError } from '~/lib/api';
+import { Bell, Moon, Plus, Search, Sun } from 'lucide-react';
 
-export default function Header({
+const Header = (
+  {
   section = "Library",
   scope = "LOC",
   hasUnread = true,
@@ -11,7 +15,11 @@ export default function Header({
   onNotifications = () => {},
   onToggleTheme = () => {},
   dark = false,
-}) {
+}
+) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
   // ⌘K / Ctrl+K opens search
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -23,6 +31,30 @@ export default function Header({
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onSearch]);
+
+  const handleLogout = async () => {
+    try {
+      await logoutRequest();
+
+      // The backend successfully destroyed the session.
+      navigate('/login', { replace: true });
+    } catch (error) {
+      if (
+        error instanceof ApiRequestError &&
+        error.status === 401
+      ) {
+        // The session is already invalid.
+        navigate('/login', { replace: true });
+        return;
+      }
+
+      console.error('Logout failed:', error);
+
+      window.alert(
+        'Logout could not be completed. Please try again.',
+      );
+    }
+  };
 
   const iconBtn =
     "relative grid h-10 w-10 place-items-center rounded-lg border border-neutral-300 bg-white text-neutral-700 hover:border-neutral-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff3d00]";
@@ -78,3 +110,4 @@ export default function Header({
     </header>
   );
 }
+export default Header;

@@ -1,11 +1,9 @@
 import { z } from 'zod';
 import { TIME_RE, isValidDateString } from '../utils/HabitDate.js';
 
-const dateString = z
-  .string()
-  .refine(isValidDateString, {
-    message: 'Date must be a real date in YYYY-MM-DD format',
-  });
+const dateString = z.string().refine(isValidDateString, {
+  message: 'Date must be a real date in YYYY-MM-DD format',
+});
 
 // Zod strips keys that aren't listed, so a client can never set
 // user, currentStreak, longestStreak, etc. through these schemas.
