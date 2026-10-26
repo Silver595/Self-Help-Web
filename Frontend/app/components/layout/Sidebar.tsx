@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import { NavLink } from 'react-router';
 import {
   Clock,
   CheckSquare,
@@ -21,42 +22,101 @@ interface User {
 }
 
 interface SidebarProps {
-  active?: string;
-  onNavigate?: (id: string) => void;
+  onNavigate?: (id: string) => void; // optional side-effect, navigation itself is handled by NavLink
   onQuickCapture?: () => void;
   onSearch?: () => void;
   user?: User;
 }
 
+// Change the `to` paths to match your routes
 const NAV = [
-  { id: 'today', label: 'TODAY', icon: Clock },
-  { id: 'habits', label: 'HABITS', icon: CheckSquare },
-  { id: 'library', label: 'LIBRARY', icon: Book },
-  { id: 'journal', label: 'JOURNAL', icon: FileText },
-  { id: 'timeline', label: 'TIMELINE', icon: GitCommitHorizontal },
-  { id: 'insights', label: 'INSIGHTS', icon: BarChart2 },
+  { id: 'today', label: 'TODAY', icon: Clock, to: '/today' },
+  { id: 'habits', label: 'HABITS', icon: CheckSquare, to: '/habits' },
+  { id: 'library', label: 'LIBRARY', icon: Book, to: '/library' },
+  { id: 'journal', label: 'JOURNAL', icon: FileText, to: '/journal' },
+  {
+    id: 'timeline',
+    label: 'TIMELINE',
+    icon: GitCommitHorizontal,
+    to: '/timeline',
+  },
+  { id: 'insights', label: 'INSIGHTS', icon: BarChart2, to: '/insights' },
 ];
 
 const PINNED = ['ATOMIC HABITS', 'WEEKLY REFLECTION'];
 
+// Reads the real screen size synchronously on the client, so a remount on route change
+// never renders the wrong width first. (Server render falls back to `false`.)
+function useMediaQuery(query: string) {
+  return useSyncExternalStore(
+    (cb) => {
+      const mql = window.matchMedia(query);
+      mql.addEventListener('change', cb);
+      return () => mql.removeEventListener('change', cb);
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
+}
+
+// Collapsed preference lives outside React, so it survives remounts and reloads
+const COLLAPSE_KEY = 'sidebar-collapsed';
+const listeners = new Set<() => void>();
+const readCollapsed = () => {
+  try {
+    return localStorage.getItem(COLLAPSE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+const writeCollapsed = (v: boolean) => {
+  try {
+    localStorage.setItem(COLLAPSE_KEY, v ? '1' : '0');
+  } catch {}
+  listeners.forEach((l) => l());
+};
+function useStoredCollapsed(): [boolean, (v: boolean) => void] {
+  const value = useSyncExternalStore(
+    (cb) => {
+      listeners.add(cb);
+      return () => listeners.delete(cb);
+    },
+    readCollapsed,
+    () => false,
+  );
+  return [value, writeCollapsed];
+}
+
 export default function Sidebar({
-  active = 'today',
   onNavigate = () => {},
   onQuickCapture = () => {},
   onSearch = () => {},
   user = { name: 'ALEX MORGAN', workspace: 'ALEX', initial: 'A' },
 }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [manualCollapsed, setManualCollapsed] = useStoredCollapsed();
+
+  // Enable the width animation only after first paint, so mounting never animates
+  const [animate, setAnimate] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setAnimate(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const isSmall = useMediaQuery('(max-width: 1023px)');
+
+  // Below lg the sidebar is always the compact rail; from lg up the user decides
+  const collapsed = isSmall || manualCollapsed;
 
   return (
     <aside
       onClick={() => {
-        // Expands only when clicking on empty background space
-        if (collapsed) setCollapsed(false);
+        // Expands only when clicking empty background space (desktop only)
+        if (manualCollapsed && !isSmall) setManualCollapsed(false);
       }}
-      className={`relative flex h-screen flex-col border-r border-neutral-300/70 bg-[#ececec] font-mono text-[12px] text-neutral-600 transition-[width] duration-200 ${
-        collapsed ? 'w-[72px] cursor-pointer' : 'w-[280px]'
-      }`}
+      className={`sticky top-0 flex h-screen shrink-0 flex-col border-r border-neutral-300/70 bg-[#ececec] font-mono text-[12px] text-neutral-600 ${
+        animate ? 'transition-[width] duration-200' : ''
+      } ${
+        collapsed ? 'w-[72px]' : 'w-[280px]'
+      } ${collapsed && !isSmall ? 'cursor-pointer' : ''}`}
     >
       {/* Top Header / Brand */}
       <div
@@ -84,9 +144,9 @@ export default function Sidebar({
             aria-label='Collapse sidebar'
             onClick={(e) => {
               e.stopPropagation();
-              setCollapsed(true);
+              setManualCollapsed(true);
             }}
-            className='text-neutral-400 hover:text-neutral-700 cursor-pointer'
+            className='cursor-pointer text-neutral-400 hover:text-neutral-700'
           >
             <ChevronLeft size={16} />
           </button>
@@ -95,25 +155,25 @@ export default function Sidebar({
 
       {/* Main Content Area */}
       <div
-        className={`flex flex-1 flex-col overflow-y-auto pb-2 ${
+        className={`flex flex-1 flex-col overflow-y-auto overflow-x-hidden pb-2 ${
           collapsed ? 'items-center px-2 pt-3' : 'px-4 pt-4'
         }`}
       >
-        {/* Workspace Switcher / Avatar Top (when collapsed) */}
+        {/* Workspace Switcher / Avatar (collapsed) */}
         {collapsed ? (
           <div
             onClick={(e) => e.stopPropagation()}
-            className='mb-3 flex flex-col items-center gap-3 w-full cursor-default'
+            className='mb-3 flex w-full cursor-default flex-col items-center gap-3'
           >
             <span className='flex h-9 w-9 items-center justify-center rounded-full bg-[#404040] font-sans text-xs font-semibold text-white shadow-sm'>
               {user.initial}
             </span>
-            <div className='w-full border-t border-neutral-300/80 my-1' />
+            <div className='my-1 w-full border-t border-neutral-300/80' />
           </div>
         ) : (
           <button
             onClick={(e) => e.stopPropagation()}
-            className='relative mb-3 flex w-full items-center justify-between rounded-xl border border-neutral-300/70 bg-[#ececec] px-3.5 py-2.5 shadow-[0_12px_20px_-6px_rgba(0,0,0,0.08)] transition-all hover:border-neutral-400 cursor-pointer'
+            className='relative mb-3 flex w-full cursor-pointer items-center justify-between rounded-xl border border-neutral-300/70 bg-[#ececec] px-3.5 py-2.5 shadow-[0_12px_20px_-6px_rgba(0,0,0,0.08)] transition-all hover:border-neutral-400'
           >
             <div className='flex items-center gap-3'>
               <span className='flex h-8 w-8 items-center justify-center rounded-full bg-[#404040] font-sans text-xs font-semibold text-white'>
@@ -134,38 +194,39 @@ export default function Sidebar({
 
         {/* Nav Items */}
         <nav
-          className={`flex flex-col gap-2 pt-1 ${collapsed ? 'w-full items-center' : 'w-full'}`}
+          className={`flex w-full flex-col gap-2 pt-1 ${collapsed ? 'items-center' : ''}`}
         >
-          {NAV.map(({ id, label, icon: Icon }, i) => {
-            const isActive = id === active;
-            return (
-              <div
-                key={id}
-                className={`relative flex items-center ${collapsed ? 'w-full justify-center' : ''}`}
-              >
-                {isActive && (
-                  <span
-                    className={`absolute ${
-                      collapsed ? '-left-2' : '-left-4'
-                    } top-1/2 h-7 w-[3.5px] -translate-y-1/2 rounded-r bg-[#ff3d00]`}
-                  />
-                )}
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevents sidebar from expanding when clicking a nav item
-                    onNavigate(id);
-                  }}
-                  className={`flex items-center rounded-xl border-b border-b-gray-400 bg-[#ececec] transition-all  cursor-pointer ${
-                    collapsed
-                      ? 'w-13 h-11 justify-center gap-1 px-1 py-1 text-[9px]'
-                      : 'w-full px-3.5 py-2.5 text-[11px] tracking-wider'
-                  } ${
-                    isActive
-                      ? 'font-bold text-[#ff3d00]'
-                      : 'text-neutral-600 hover:text-neutral-900 hover:border-neutral-400'
-                  }`}
-                >
+          {NAV.map(({ id, label, icon: Icon, to }, i) => (
+            <NavLink
+              key={id}
+              to={to}
+              title={collapsed ? label : undefined}
+              aria-label={label}
+              onClick={(e) => {
+                e.stopPropagation(); // don't trigger the sidebar's expand-on-click
+                onNavigate(id);
+              }}
+              className={({ isActive }) =>
+                `relative flex cursor-pointer items-center rounded-xl border-b border-b-gray-400 bg-[#ececec] transition-all ${
+                  collapsed
+                    ? 'h-11 w-[52px] justify-center gap-1 px-1 py-1 text-[9px]'
+                    : 'w-full px-3.5 py-2.5 text-[11px] tracking-wider'
+                } ${
+                  isActive
+                    ? 'font-bold text-[#ff3d00]'
+                    : 'text-neutral-600 hover:border-neutral-400 hover:text-neutral-900'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span
+                      className={`absolute ${
+                        collapsed ? '-left-2' : '-left-4'
+                      } top-1/2 h-7 w-[3.5px] -translate-y-1/2 rounded-r bg-[#ff3d00]`}
+                    />
+                  )}
                   <Icon
                     size={collapsed ? 15 : 16}
                     strokeWidth={1.75}
@@ -173,7 +234,9 @@ export default function Sidebar({
                   />
                   {collapsed ? (
                     <span
-                      className={`text-[9px] font-bold ${isActive ? 'text-[#ff3d00]' : 'text-neutral-400'}`}
+                      className={`text-[9px] font-bold ${
+                        isActive ? 'text-[#ff3d00]' : 'text-neutral-400'
+                      }`}
                     >
                       {String(i + 1).padStart(2, '0')}
                     </span>
@@ -189,10 +252,10 @@ export default function Sidebar({
                       </span>
                     </>
                   )}
-                </button>
-              </div>
-            );
-          })}
+                </>
+              )}
+            </NavLink>
+          ))}
         </nav>
 
         {/* Divider */}
@@ -202,23 +265,27 @@ export default function Sidebar({
 
         {/* Search & Quick Capture */}
         {collapsed ? (
-          <div className='flex flex-col gap-2.5 items-center w-full'>
+          <div className='flex w-full flex-col items-center gap-2.5'>
             <button
+              aria-label='Search'
+              title='Search'
               onClick={(e) => {
                 e.stopPropagation();
                 onSearch();
               }}
-              className='flex h-11 w-13 items-center justify-center rounded-xl border border-neutral-300/70 bg-[#ececec] text-neutral-600 shadow-[0_12px_20px_-6px_rgba(0,0,0,0.08)] hover:text-neutral-900 hover:border-neutral-400 transition-all cursor-pointer'
+              className='flex h-11 w-[52px] cursor-pointer items-center justify-center rounded-xl border border-neutral-300/70 bg-[#ececec] text-neutral-600 shadow-[0_12px_20px_-6px_rgba(0,0,0,0.08)] transition-all hover:border-neutral-400 hover:text-neutral-900'
             >
               <Search size={16} strokeWidth={1.75} />
             </button>
 
             <button
+              aria-label='Quick capture'
+              title='Quick capture'
               onClick={(e) => {
                 e.stopPropagation();
                 onQuickCapture();
               }}
-              className='flex h-11 w-13 items-center justify-center rounded-xl bg-[#ff3d00] text-white shadow-[0_10px_20px_-4px_rgba(255,61,0,0.35)] transition-colors hover:bg-[#e03600] cursor-pointer'
+              className='flex h-11 w-[52px] cursor-pointer items-center justify-center rounded-xl bg-[#ff3d00] text-white shadow-[0_10px_20px_-4px_rgba(255,61,0,0.35)] transition-colors hover:bg-[#e03600]'
             >
               <Plus size={18} strokeWidth={2.5} />
             </button>
@@ -230,7 +297,7 @@ export default function Sidebar({
                 e.stopPropagation();
                 onSearch();
               }}
-              className='flex w-full items-center justify-between rounded-xl border-b border-b-gray-400 bg-[#ececec] px-3.5 py-2 text-[11px] tracking-wider text-neutral-600 shadow-[0_12px_20px_-6px_rgba(0,0,0,0.08)] hover:text-neutral-900 hover:border-neutral-400 transition-all cursor-pointer'
+              className='flex w-full cursor-pointer items-center justify-between rounded-xl border-b border-b-gray-400 bg-[#ececec] px-3.5 py-2 text-[11px] tracking-wider text-neutral-600 shadow-[0_12px_20px_-6px_rgba(0,0,0,0.08)] transition-all hover:border-neutral-400 hover:text-neutral-900'
             >
               <div className='flex items-center gap-3'>
                 <Search size={16} strokeWidth={1.75} />
@@ -246,7 +313,7 @@ export default function Sidebar({
                 e.stopPropagation();
                 onQuickCapture();
               }}
-              className='flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#ff3d00] text-[11px] font-bold tracking-wider text-white shadow-[0_10px_20px_-4px_rgba(255,61,0,0.35)] transition-colors hover:bg-[#e03600] cursor-pointer'
+              className='flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#ff3d00] text-[11px] font-bold tracking-wider text-white shadow-[0_10px_20px_-4px_rgba(255,61,0,0.35)] transition-colors hover:bg-[#e03600]'
             >
               <Plus size={16} strokeWidth={2.5} /> QUICK CAPTURE
             </button>
@@ -261,7 +328,7 @@ export default function Sidebar({
                   <li key={p}>
                     <button
                       onClick={(e) => e.stopPropagation()}
-                      className='flex items-center gap-2 px-1 text-[11px] tracking-wider text-neutral-600 hover:text-neutral-900 cursor-pointer'
+                      className='flex cursor-pointer items-center gap-2 px-1 text-[11px] tracking-wider text-neutral-600 hover:text-neutral-900'
                     >
                       <svg
                         width='14'
@@ -294,19 +361,22 @@ export default function Sidebar({
       >
         {collapsed ? (
           <>
-            <button
-              aria-label='Expand sidebar'
-              onClick={(e) => {
-                e.stopPropagation();
-                setCollapsed(false);
-              }}
-              className='text-neutral-400 hover:text-neutral-700 p-1 cursor-pointer'
-            >
-              <ChevronRight size={18} />
-            </button>
+            {/* Expand toggle only makes sense on desktop; on small screens it stays compact */}
+            {!isSmall && (
+              <button
+                aria-label='Expand sidebar'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setManualCollapsed(false);
+                }}
+                className='cursor-pointer p-1 text-neutral-400 hover:text-neutral-700'
+              >
+                <ChevronRight size={18} />
+              </button>
+            )}
             <span
               onClick={(e) => e.stopPropagation()}
-              className='flex h-9 w-9 items-center justify-center rounded-full bg-[#404040] font-sans text-xs font-semibold text-white shadow-sm cursor-default'
+              className='flex h-9 w-9 cursor-default items-center justify-center rounded-full bg-[#404040] font-sans text-xs font-semibold text-white shadow-sm'
             >
               {user.initial}
             </span>
@@ -314,7 +384,7 @@ export default function Sidebar({
         ) : (
           <button
             onClick={(e) => e.stopPropagation()}
-            className='flex w-full items-center gap-3 text-left cursor-pointer'
+            className='flex w-full cursor-pointer items-center gap-3 text-left'
           >
             <span className='flex h-9 w-9 items-center justify-center rounded-full bg-[#404040] font-sans text-xs font-semibold text-white'>
               {user.initial}
