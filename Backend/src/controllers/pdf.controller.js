@@ -3,7 +3,7 @@ import { Resource } from '../models/resource.model.js'; // adjust to your real p
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
-import { PDF_FOLDER, DOWNLOAD_LINK_EXPIRY } from '../constanst.js';
+import { PDF_FOLDER, DOWNLOAD_LINK_EXPIRY } from '../constants.js';
 import {
   uploadToR2,
   deleteFromR2,

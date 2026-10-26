@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { r2, R2_BUCKET } from '../config/r2.config.js';
-import { DOWNLOAD_LINK_EXPIRY } from '../constanst.js';
+import { DOWNLOAD_LINK_EXPIRY } from '../constants.js';
 
 
 // R2 deletes max 1000 files per request, so we split into chunks

@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { getCurrentUser } from '~/lib/auth';
 import { ApiRequestError } from '~/lib/api';
-import { Sidebar } from 'lucide-react';
 import ScrollProgress from '~/components/layout/ScrollProgress';
 import Header from '~/components/layout/Header';
+import Sidebar from '~/components/layout/Sidebar';
 
 type AuthCheck = {
   pathname: string;

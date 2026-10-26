@@ -1,6 +1,6 @@
 import multer from 'multer';
 import { ApiError } from '../utils/ApiError.js';
-import { MAX_PDF_SIZE } from '../constanst.js';
+import { MAX_PDF_SIZE } from '../constants.js';
 
 const upload = multer({
     storage: multer.memoryStorage(),
