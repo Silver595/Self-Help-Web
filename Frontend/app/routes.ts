@@ -17,6 +17,7 @@ export default [
   // Protected pages: authentication is checked by AppLayout.
   layout('layouts/AppLayout.tsx', [
     route('dashboard', 'routes/dashboard.tsx'),
+    route('habits','routes/habits.tsx'),
     route('library', 'routes/library.tsx'),
 
     // Existing fallback for unfinished features.
