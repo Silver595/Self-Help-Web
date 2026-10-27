@@ -77,3 +77,7 @@ export const listQuerySchema = z.object({
   tag: z.string().trim().toLowerCase().optional(),
   archived: z.enum(['true', 'false']).default('false'),
 });
+export const weeklySummaryQuerySchema = z.object({
+  from: dateString,
+  to: dateString,
+});

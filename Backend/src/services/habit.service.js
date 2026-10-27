@@ -166,3 +166,100 @@ export const deleteWithHistory = async (habitId, userId) => {
   await habit.deleteOne();
   return habit;
 };
+export const getWeeklySummary = async (userId, from, to) => {
+  assertDate(from, 'from');
+  assertDate(to, 'to');
+
+  if (from > to) {
+    throw new ApiError(400, '"from" cannot be after "to"');
+  }
+
+  if (dayNumber(to) - dayNumber(from) + 1 > MAX_RANGE_DAYS) {
+    throw new ApiError(
+      400,
+      `Date range cannot exceed ${MAX_RANGE_DAYS} days`,
+    );
+  }
+
+  const [habits, logs] = await Promise.all([
+    Habit.find({ user: userId, isArchived: false }).sort({
+      createdAt: 1,
+    }),
+    HabitLog.find({
+      user: userId,
+      date: { $gte: from, $lte: to },
+    })
+      .select('habit date value')
+      .lean(),
+  ]);
+
+  const valueByHabitDate = new Map(
+    logs.map((log) => [
+      `${log.habit}:${log.date}`,
+      log.value,
+    ]),
+  );
+
+  const todayByHabit = new Map(
+    habits.map((habit) => [
+      habit._id.toString(),
+      habit.today(),
+    ]),
+  );
+
+  const days = [];
+
+  for (
+    let day = dayNumber(from);
+    day <= dayNumber(to);
+    day++
+  ) {
+    const date = fromDayNumber(day);
+    let scheduled = 0;
+    let completed = 0;
+
+    for (const habit of habits) {
+      const habitId = habit._id.toString();
+      const habitToday = todayByHabit.get(habitId);
+
+      if (
+        date > habitToday ||
+        !habit.isScheduledOn(date)
+      ) {
+        continue;
+      }
+
+      scheduled++;
+
+      const value =
+        valueByHabitDate.get(`${habitId}:${date}`) ?? 0;
+
+      if (habit.isComplete(value)) {
+        completed++;
+      }
+    }
+
+    days.push({ date, scheduled, completed });
+  }
+
+  const scheduledActions = days.reduce(
+    (total, day) => total + day.scheduled,
+    0,
+  );
+
+  const completedActions = days.reduce(
+    (total, day) => total + day.completed,
+    0,
+  );
+
+  return {
+    from,
+    to,
+    scheduledActions,
+    completedActions,
+    completionRate: scheduledActions
+      ? completedActions / scheduledActions
+      : 0,
+    days,
+  };
+};

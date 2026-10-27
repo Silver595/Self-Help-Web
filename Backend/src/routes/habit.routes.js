@@ -3,6 +3,7 @@ import { verifyJWT } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { validateObjectIdParam } from '../middlewares/validateObjectId.middleware.js';
 import {
+  weeklySummaryQuerySchema,
   createHabitSchema,
   updateHabitSchema,
   logSchema,
@@ -21,6 +22,7 @@ import {
   setHabitLog,
   deleteHabitLog,
   getHabitStats,
+  getHabitWeeklySummary,
 } from '../controllers/habit.controller.js';
 
 const router = Router();
@@ -40,6 +42,12 @@ router
 // Must come BEFORE '/:id', otherwise Express treats "today" as an id
 router.route('/today').get(getTodayHabits);
 
+router
+  .route('/weekly-summary')
+  .get(
+    validate(weeklySummaryQuerySchema, 'query'),
+    getHabitWeeklySummary,
+  );
 // Single habit
 router
   .route('/:id')

@@ -2,6 +2,7 @@ import asyncHandler from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { Habit } from '../models/habit.model.js';
+import { getWeeklySummary } from '../services/habit.service.js';
 import {
   findOwnedHabit,
   logProgress,
@@ -148,3 +149,24 @@ export const getHabitStats = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, stats, 'Stats fetched successfully'));
 });
+export const getHabitWeeklySummary = asyncHandler(
+  async (req, res) => {
+    const { from, to } = req.validQuery;
+
+    const summary = await getWeeklySummary(
+      req.user._id,
+      from,
+      to,
+    );
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          summary,
+          'Habit weekly summary fetched successfully',
+        ),
+      );
+  },
+);
