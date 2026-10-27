@@ -106,7 +106,20 @@ export interface HabitStats {
   days: HabitDayStat[];
 }
 
+export interface HabitWeeklySummaryDay {
+  date: string;
+  scheduled: number;
+  completed: number;
+}
 
+export interface HabitWeeklySummary {
+  from: string;
+  to: string;
+  scheduledActions: number;
+  completedActions: number;
+  completionRate: number;
+  days: HabitWeeklySummaryDay[];
+}
 
 export type UpdateHabitInput =
   Partial<Omit<CreateHabitInput, 'schedule' | 'target' | 'reminder'>> & {
@@ -201,4 +214,14 @@ export type UpdateHabitInput =
     return api<Record<string, never>>(`/habits/${id}`, {
       method: 'DELETE',
     });
+  }
+  export function getHabitWeeklySummary(
+    from: string,
+    to: string,
+  ) {
+    const params = new URLSearchParams({ from, to });
+
+    return api<HabitWeeklySummary>(
+      `/habits/weekly-summary?${params.toString()}`,
+    );
   }
