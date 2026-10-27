@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { validateObjectIdParam } from '../middlewares/validateObjectId.middleware.js';
+import { weeklySummaryQuerySchema } from '../validators/habit.validator.js';
 import {
   createHabitSchema,
   updateHabitSchema,
