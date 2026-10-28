@@ -121,12 +121,21 @@ export interface HabitWeeklySummary {
   days: HabitWeeklySummaryDay[];
 }
 
+
 export type UpdateHabitInput =
-  Partial<Omit<CreateHabitInput, 'schedule' | 'target' | 'reminder'>> & {
+  Partial<
+    Omit<
+      CreateHabitInput,
+      'schedule' | 'target' | 'reminder' | 'endDate'
+    >
+  > & {
+    endDate?: string | null;
     schedule?: Partial<CreateHabitInput['schedule']>;
     target?: Partial<CreateHabitInput['target']>;
     reminder?: Partial<CreateHabitInput['reminder']>;
   };
+
+
   export function getHabits() {
     return api<Habit[]>('/habits');
   }
