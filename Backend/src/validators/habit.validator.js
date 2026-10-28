@@ -49,13 +49,13 @@ export const createHabitSchema = z.object({
     .optional(),
 });
 
-// Every field optional for PATCH
+
 export const updateHabitSchema = createHabitSchema
   .extend({
-    // .partial() is shallow, so make the nested objects partial too
     schedule: createHabitSchema.shape.schedule.unwrap().partial().optional(),
     target: createHabitSchema.shape.target.unwrap().partial().optional(),
     reminder: createHabitSchema.shape.reminder.unwrap().partial().optional(),
+    endDate: dateString.nullable().optional(),
   })
   .partial();
 

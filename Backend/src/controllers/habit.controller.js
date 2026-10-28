@@ -77,17 +77,19 @@ export const updateHabit = asyncHandler(async (req, res) => {
 
   const habit = await findOwnedHabit(req.params.id, req.user._id);
 
-  // Set nested fields one key at a time so a partial update
-  // (e.g. only schedule.type) doesn't wipe the sibling keys
+
   for (const [key, value] of Object.entries(data)) {
     if (NESTED_FIELDS.includes(key)) {
       for (const [innerKey, innerValue] of Object.entries(value)) {
         habit.set(`${key}.${innerKey}`, innerValue);
       }
+    } else if (key === 'endDate' && value === null) {
+      habit.set('endDate', undefined);
     } else {
       habit.set(key, value);
     }
   }
+
 
   try {
     await habit.save();
