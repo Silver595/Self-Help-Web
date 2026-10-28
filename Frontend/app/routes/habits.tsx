@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Archive, Plus } from 'lucide-react';
 
 import HabitFormModal from '~/components/features/habits/HabitFormModal';
+import HabitHistoryModal from '~/components/features/habits/HabitHistoryModal';
 import HabitOverview from '~/components/features/habits/HabitOverview';
 import HabitFilters from '~/components/features/habits/HabitFilters';
 import HabitList from '~/components/features/habits/HabitList';
@@ -22,6 +23,7 @@ export default function HabitsPage() {
   const [search, setSearch] = useState('');
 
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [historyHabit, setHistoryHabit] = useState<Habit | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const {
@@ -60,7 +62,8 @@ export default function HabitsPage() {
         .includes(query);
 
       const matchesTag =
-        selectedTag === 'all' || habit.tags.includes(selectedTag);
+        selectedTag === 'all' ||
+        habit.tags.includes(selectedTag);
 
       return matchesSearch && matchesTag;
     });
@@ -76,6 +79,15 @@ export default function HabitsPage() {
     clearMessages();
     setEditingHabit(habit);
     setIsFormOpen(true);
+  }
+
+  function openHistory(habit: Habit) {
+    clearMessages();
+    setHistoryHabit(habit);
+  }
+
+  function closeHistory() {
+    setHistoryHabit(null);
   }
 
   function closeForm() {
@@ -96,13 +108,6 @@ export default function HabitsPage() {
     }
 
     return succeeded;
-  }
-
-  function handleManageHabit(
-    habit: Habit,
-    action: 'archive' | 'restore' | 'delete',
-  ) {
-    void manageHabit(habit, action);
   }
 
   function toggleArchivedView() {
@@ -208,7 +213,7 @@ export default function HabitsPage() {
             <p className="mt-1 text-sm text-[#72726f]">
               {showArchived
                 ? 'Restore habits or delete them permanently.'
-                : 'Track progress, edit routines, and manage your habits.'}
+                : 'Track progress, view history, and manage your habits.'}
             </p>
           </div>
 
@@ -231,8 +236,11 @@ export default function HabitsPage() {
           totalHabits={habits.length}
           updatingId={updatingId}
           onEdit={openEditForm}
+          onViewHistory={openHistory}
           onProgress={(item) => void toggleProgress(item)}
-          onManage={handleManageHabit}
+          onManage={(habit, action) => {
+            void manageHabit(habit, action);
+          }}
           onCreate={openCreateForm}
         />
       </section>
@@ -244,6 +252,14 @@ export default function HabitsPage() {
           isSaving={isSaving}
           onClose={closeForm}
           onSave={handleSaveHabit}
+        />
+      )}
+
+      {historyHabit && (
+        <HabitHistoryModal
+          key={historyHabit._id}
+          habit={historyHabit}
+          onClose={closeHistory}
         />
       )}
     </section>

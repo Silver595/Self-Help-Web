@@ -14,6 +14,7 @@ interface HabitListProps {
   totalHabits: number;
   updatingId: string | null;
   onEdit: (habit: Habit) => void;
+  onViewHistory: (habit: Habit) => void;
   onProgress: (item: TodayHabit) => void;
   onManage: (
     habit: Habit,
@@ -35,6 +36,7 @@ export default function HabitList({
   totalHabits,
   updatingId,
   onEdit,
+  onViewHistory,
   onProgress,
   onManage,
   onCreate,
@@ -91,11 +93,14 @@ export default function HabitList({
               key={habit._id}
               habit={habit}
               todayRecord={
-                showArchived ? undefined : todayById.get(habit._id)
+                showArchived
+                  ? undefined
+                  : todayById.get(habit._id)
               }
               showArchived={showArchived}
               isUpdating={updatingId === habit._id}
               onEdit={onEdit}
+              onViewHistory={onViewHistory}
               onProgress={onProgress}
               onManage={onManage}
             />

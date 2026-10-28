@@ -1,8 +1,8 @@
-
 import {
   Archive,
   Check,
   Flame,
+  History,
   LoaderCircle,
   Pencil,
   RotateCcw,
@@ -17,6 +17,7 @@ interface HabitRowProps {
   showArchived: boolean;
   isUpdating: boolean;
   onEdit: (habit: Habit) => void;
+  onViewHistory: (habit: Habit) => void;
   onProgress: (item: TodayHabit) => void;
   onManage: (
     habit: Habit,
@@ -34,7 +35,13 @@ const dangerButtonClass =
   'inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50';
 
 const DAYS = [
-  'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat',
+  'Sun',
+  'Mon',
+  'Tue',
+  'Wed',
+  'Thu',
+  'Fri',
+  'Sat',
 ];
 
 function getScheduleLabel(habit: Habit) {
@@ -53,6 +60,7 @@ export default function HabitRow({
   showArchived,
   isUpdating,
   onEdit,
+  onViewHistory,
   onProgress,
   onManage,
 }: HabitRowProps) {
@@ -104,7 +112,7 @@ export default function HabitRow({
             </h3>
 
             {isCompleted && (
-              <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-700">
+              <span className="rounded-full bg-orange-50-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#fa3600]">
                 Completed
               </span>
             )}
@@ -118,6 +126,7 @@ export default function HabitRow({
 
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#72726f]">
             <span>{getScheduleLabel(habit)}</span>
+
             <span>
               Target: {habit.target.count} {habit.target.unit}
             </span>
@@ -170,6 +179,16 @@ export default function HabitRow({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+        <button
+          type="button"
+          disabled={isUpdating}
+          onClick={() => onViewHistory(habit)}
+          className={secondaryButtonClass}
+        >
+          <History size={15} />
+          History
+        </button>
+
         {showArchived ? (
           <>
             <button
@@ -242,7 +261,10 @@ export default function HabitRow({
                 ) : (
                   <Check size={16} />
                 )}
-                {isCompleted ? 'Undo completion' : 'Mark complete'}
+
+                {isCompleted
+                  ? 'Undo completion'
+                  : 'Mark complete'}
               </button>
             ) : (
               <span className="inline-flex rounded-lg bg-[#f4f4f1] px-3 py-2.5 text-xs text-[#72726f]">
