@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import { useLocation, useOutlet } from 'react-router';
-import gsap from 'gsap';
+import { gsap } from 'gsap';
 
 /**
  * GSAP version of the 3-step horizontal curtain.

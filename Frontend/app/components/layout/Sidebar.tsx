@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { flushSync } from 'react-dom';
 import { NavLink } from 'react-router';
-import gsap from 'gsap';
+import { gsap } from 'gsap';
 import {
   Clock,
   CheckSquare,
