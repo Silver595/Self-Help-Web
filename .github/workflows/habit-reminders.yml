@@ -46,6 +46,30 @@ jobs:
         working-directory: Backend
         run: npm ci
 
-      - name: Run habit reminders
-        working-directory: Backend
-        run: node src/jobs/sendHabitReminders.js
+      - name: Validate VAPID key format
+        env:
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+        run: |
+          node --input-type=module <<'NODE'
+          const pub = process.env.VAPID_PUBLIC_KEY ?? "";
+          const priv = process.env.VAPID_PRIVATE_KEY ?? "";
+
+          const validFormat = key => /^[A-Za-z0-9_-]+$/.test(key);
+          const decode = key =>
+            Buffer.from(
+              key.replace(/-/g, "+").replace(/_/g, "/"),
+              "base64"
+            );
+
+          const publicBytes = validFormat(pub) ? decode(pub).length : 0;
+          const privateBytes = validFormat(priv) ? decode(priv).length : 0;
+
+          console.log(`Public key: ${publicBytes} decoded bytes`);
+          console.log(`Private key: ${privateBytes} decoded bytes`);
+
+          if (publicBytes !== 65 || privateBytes !== 32) {
+            console.error("VAPID key format is invalid.");
+            process.exit(1);
+          }
+          NODE
