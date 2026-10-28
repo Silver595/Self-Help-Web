@@ -1,5 +1,19 @@
 import React from 'react';
-import { BookOpen, CheckCircle2 } from 'lucide-react';
+import {
+  BookOpen,
+  CheckCircle2,
+  Archive,
+  Pencil,
+  RotateCcw,
+  Trash2,
+} from 'lucide-react';
+import {
+  updateHabit,
+  getArchivedHabits,
+  archiveHabit,
+  restoreHabit,
+  deleteHabit
+} from '~/lib/habits';
 
 interface PracticeItemRowProps {
   title?: string;
