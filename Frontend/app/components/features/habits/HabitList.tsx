@@ -2,6 +2,7 @@
 import { LoaderCircle, Target } from 'lucide-react';
 
 import type { Habit, TodayHabit } from '~/lib/habits';
+import type { ProgressChange } from '~/hooks/useHabits';
 import HabitRow from './HabitRow';
 
 interface HabitListProps {
@@ -16,6 +17,7 @@ interface HabitListProps {
   onEdit: (habit: Habit) => void;
   onViewHistory: (habit: Habit) => void;
   onProgress: (item: TodayHabit) => void;
+  onAdjustProgress: (item: TodayHabit, change: ProgressChange) => void;
   onManage: (
     habit: Habit,
     action: 'archive' | 'restore' | 'delete',
@@ -38,6 +40,7 @@ export default function HabitList({
   onEdit,
   onViewHistory,
   onProgress,
+  onAdjustProgress,
   onManage,
   onCreate,
 }: HabitListProps) {
@@ -93,15 +96,14 @@ export default function HabitList({
               key={habit._id}
               habit={habit}
               todayRecord={
-                showArchived
-                  ? undefined
-                  : todayById.get(habit._id)
+                showArchived ? undefined : todayById.get(habit._id)
               }
               showArchived={showArchived}
               isUpdating={updatingId === habit._id}
               onEdit={onEdit}
               onViewHistory={onViewHistory}
               onProgress={onProgress}
+              onAdjustProgress={onAdjustProgress}
               onManage={onManage}
             />
           ))}

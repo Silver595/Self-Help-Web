@@ -40,6 +40,7 @@ export default function HabitsPage() {
     clearMessages,
     saveHabit,
     toggleProgress,
+    adjustProgress,
     manageHabit,
   } = useHabits(showArchived);
 
@@ -238,6 +239,9 @@ export default function HabitsPage() {
           onEdit={openEditForm}
           onViewHistory={openHistory}
           onProgress={(item) => void toggleProgress(item)}
+          onAdjustProgress={(item, change) =>
+            void adjustProgress(item, change)
+          }
           onManage={(habit, action) => {
             void manageHabit(habit, action);
           }}

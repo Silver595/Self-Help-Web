@@ -20,6 +20,7 @@ import {
 } from '~/lib/habits';
 
 export type HabitManagementAction = 'archive' | 'restore' | 'delete';
+export type ProgressChange = -1 | 1;
 
 export function useHabits(showArchived: boolean) {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -41,21 +42,20 @@ export function useHabits(showArchived: boolean) {
       setError('');
 
       try {
-        const today = new Date();
-        const monday = new Date(today);
+        const now = new Date();
+        const monday = new Date(now);
 
         monday.setDate(
-          today.getDate() - ((today.getDay() + 6) % 7),
+          now.getDate() - ((now.getDay() + 6) % 7),
         );
 
         const sunday = new Date(monday);
         sunday.setDate(monday.getDate() + 6);
 
-        const toDateString = (date: Date) => {
+        const formatDate = (date: Date) => {
           const year = date.getFullYear();
           const month = String(date.getMonth() + 1).padStart(2, '0');
           const day = String(date.getDate()).padStart(2, '0');
-
           return `${year}-${month}-${day}`;
         };
 
@@ -69,14 +69,11 @@ export function useHabits(showArchived: boolean) {
 
         try {
           const summary = await getHabitWeeklySummary(
-            toDateString(monday),
-            toDateString(sunday),
+            formatDate(monday),
+            formatDate(sunday),
           );
-
           setWeeklySummary(summary);
         } catch {
-          // The habit list should remain usable if the optional
-          // weekly-summary endpoint is unavailable.
           setWeeklySummary(null);
         }
       } catch (caught) {
@@ -104,7 +101,10 @@ export function useHabits(showArchived: boolean) {
 
       try {
         if (existingHabit) {
-          await updateHabit(existingHabit._id, data);
+          await updateHabit(existingHabit._id, {
+            ...data,
+            endDate: data.endDate || null,
+          });
           setNotice('Habit updated successfully.');
         } else {
           await createHabit(data);
@@ -119,7 +119,6 @@ export function useHabits(showArchived: boolean) {
             ? caught.message
             : 'Unable to save habit.',
         );
-
         return false;
       } finally {
         setIsSaving(false);
@@ -144,7 +143,6 @@ export function useHabits(showArchived: boolean) {
             item.date,
             item.target,
           );
-
           setNotice(`"${item.habit.title}" marked complete.`);
         }
 
@@ -154,6 +152,54 @@ export function useHabits(showArchived: boolean) {
           caught instanceof Error
             ? caught.message
             : 'Unable to update progress.',
+        );
+      } finally {
+        setUpdatingId(null);
+      }
+    },
+    [loadData],
+  );
+
+  const adjustProgress = useCallback(
+    async (item: TodayHabit, change: ProgressChange) => {
+      const nextValue = item.value + change;
+
+      if (
+        nextValue < 0 ||
+        nextValue > item.target ||
+        nextValue === item.value
+      ) {
+        return;
+      }
+
+      setError('');
+      setNotice('');
+      setUpdatingId(item.habit._id);
+
+      try {
+        if (nextValue === 0) {
+          await removeHabitProgress(item.habit._id, item.date);
+          setNotice(`Progress reset for "${item.habit.title}".`);
+        } else {
+          await setHabitProgress(
+            item.habit._id,
+            item.date,
+            nextValue,
+          );
+
+          setNotice(
+            nextValue >= item.target
+              ? `"${item.habit.title}" goal reached!`
+              : `Progress updated: ${nextValue}/${item.target} ${item.habit.target.unit}.`,
+          );
+        }
+
+        await loadData(false);
+      } catch (caught) {
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : 'Unable to adjust progress.',
         );
       } finally {
         setUpdatingId(null);
@@ -214,6 +260,7 @@ export function useHabits(showArchived: boolean) {
     loadData,
     saveHabit,
     toggleProgress,
+    adjustProgress,
     manageHabit,
   };
 }

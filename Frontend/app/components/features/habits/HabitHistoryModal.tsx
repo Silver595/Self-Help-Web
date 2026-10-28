@@ -9,13 +9,19 @@ import {
   X,
 } from 'lucide-react';
 
-import { useHabitStats } from '~/hooks/useHabitStats';
+import { useHabitStats, type HabitStatsRange } from '~/hooks/useHabitStats';
 import type { Habit } from '~/lib/habits';
 
 interface HabitHistoryModalProps {
   habit: Habit;
   onClose: () => void;
 }
+
+const RANGE_OPTIONS: { label: string; value: HabitStatsRange }[] = [
+  { label: '7 days', value: 7 },
+  { label: '30 days', value: 30 },
+  { label: '90 days', value: 90 },
+];
 
 function formatDate(date: string) {
   return new Date(`${date}T12:00:00`).toLocaleDateString(undefined, {
@@ -40,13 +46,17 @@ export default function HabitHistoryModal({
   habit,
   onClose,
 }: HabitHistoryModalProps) {
-  const { stats, isLoading, error } = useHabitStats(habit._id);
+  const {
+    stats,
+    range,
+    setRange,
+    isLoading,
+    error,
+  } = useHabitStats(habit._id);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        onClose();
-      }
+      if (event.key === 'Escape') onClose();
     }
 
     window.addEventListener('keydown', handleKeyDown);
@@ -66,9 +76,7 @@ export default function HabitHistoryModal({
     <div
       className="fixed inset-0 z-[110] grid place-items-center overflow-y-auto bg-black/40 p-4"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
+        if (event.target === event.currentTarget) onClose();
       }}
     >
       <section
@@ -112,6 +120,31 @@ export default function HabitHistoryModal({
           </button>
         </header>
 
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-medium">History period</p>
+
+          <div
+            className="inline-flex rounded-lg border border-[#e7e7e2] bg-white p-1"
+            aria-label="Select history period"
+          >
+            {RANGE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={range === option.value}
+                onClick={() => setRange(option.value)}
+                className={`rounded-md px-3 py-2 text-xs font-medium transition ${
+                  range === option.value
+                    ? 'bg-[#fa3600] text-white'
+                    : 'text-[#626260] hover:bg-[#f4f4f1]'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {isLoading ? (
           <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-[#72726f]">
             <LoaderCircle size={19} className="animate-spin" />
@@ -125,7 +158,7 @@ export default function HabitHistoryModal({
             {error}
           </div>
         ) : stats ? (
-          <div className="mt-6 space-y-6">
+          <div className="mt-5 space-y-6">
             <p className="text-xs text-[#72726f]">
               Period: {formatDate(stats.from)} to {formatDate(stats.to)}
             </p>
@@ -136,11 +169,9 @@ export default function HabitHistoryModal({
                   <CheckCircle2 size={15} />
                   Completion
                 </div>
-
                 <p className="mt-3 text-2xl font-semibold">
                   {completionPercent}%
                 </p>
-
                 <p className="mt-1 text-xs text-[#72726f]">
                   {stats.completedDays} of {stats.scheduledDays} days
                 </p>
@@ -151,11 +182,9 @@ export default function HabitHistoryModal({
                   <CalendarDays size={15} />
                   Scheduled
                 </div>
-
                 <p className="mt-3 text-2xl font-semibold">
                   {stats.scheduledDays}
                 </p>
-
                 <p className="mt-1 text-xs text-[#72726f]">
                   Days due in this period
                 </p>
@@ -166,13 +195,11 @@ export default function HabitHistoryModal({
                   <Flame size={15} />
                   Current streak
                 </div>
-
                 <p className="mt-3 text-2xl font-semibold">
                   {stats.currentStreak}
                 </p>
-
                 <p className="mt-1 text-xs text-[#72726f]">
-                  Consecutive scheduled days
+                  Current consecutive streak
                 </p>
               </article>
 
@@ -181,11 +208,9 @@ export default function HabitHistoryModal({
                   <Trophy size={15} />
                   Best streak
                 </div>
-
                 <p className="mt-3 text-2xl font-semibold">
                   {stats.longestStreak}
                 </p>
-
                 <p className="mt-1 text-xs text-[#72726f]">
                   Longest consecutive streak
                 </p>
@@ -200,7 +225,6 @@ export default function HabitHistoryModal({
                     Target: {habit.target.count} {habit.target.unit} per scheduled day
                   </p>
                 </div>
-
                 <span className="text-xs text-[#72726f]">
                   Latest first
                 </span>
@@ -256,7 +280,6 @@ export default function HabitHistoryModal({
                             <p className="text-sm font-medium">
                               {formatShortDate(day.date)}
                             </p>
-
                             <span className="text-xs text-[#72726f]">
                               {status}
                             </span>
@@ -273,7 +296,6 @@ export default function HabitHistoryModal({
                                   }}
                                 />
                               </div>
-
                               <p className="mt-1 text-xs text-[#858580]">
                                 {day.value} of {habit.target.count}{' '}
                                 {habit.target.unit}

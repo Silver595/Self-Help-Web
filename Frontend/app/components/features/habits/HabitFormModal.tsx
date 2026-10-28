@@ -1,5 +1,5 @@
 
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { LoaderCircle, X } from 'lucide-react';
 
 import type {
@@ -71,13 +71,39 @@ export default function HabitFormModal({
   const [targetUnit, setTargetUnit] = useState(
     habit?.target.unit ?? 'times',
   );
+
   const [startDate, setStartDate] = useState(
     habit?.startDate ?? localDateString(new Date()),
   );
+  const [endDate, setEndDate] = useState(habit?.endDate ?? '');
+
+  const [reminderEnabled, setReminderEnabled] = useState(
+    habit?.reminder.enabled ?? false,
+  );
+  const [reminderTime, setReminderTime] = useState(
+    habit?.reminder.time ?? '08:00',
+  );
+
   const [color, setColor] = useState(
     habit?.color ?? '#fa3600',
   );
   const [formError, setFormError] = useState('');
+
+  useEffect(() => {
+    if (isSaving) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSaving, onClose]);
 
   function toggleDay(day: number) {
     setSelectedDays((current) =>
@@ -107,6 +133,16 @@ export default function HabitFormModal({
 
     if (!Number.isInteger(count) || count < 1) {
       setFormError('The target must be a whole number of at least 1.');
+      return;
+    }
+
+    if (endDate && endDate < startDate) {
+      setFormError('The end date cannot be before the start date.');
+      return;
+    }
+
+    if (reminderEnabled && !reminderTime) {
+      setFormError('Choose a time for the reminder.');
       return;
     }
 
@@ -141,6 +177,15 @@ export default function HabitFormModal({
         Intl.DateTimeFormat().resolvedOptions().timeZone ||
         'Asia/Kolkata',
       startDate,
+      endDate: endDate || undefined,
+      reminder: reminderEnabled
+        ? {
+            enabled: true,
+            time: reminderTime,
+          }
+        : {
+            enabled: false,
+          },
       color,
     };
 
@@ -153,7 +198,10 @@ export default function HabitFormModal({
     <div
       className="fixed inset-0 z-[100] grid place-items-center overflow-y-auto bg-black/40 p-4"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget && !isSaving) {
+        if (
+          event.target === event.currentTarget &&
+          !isSaving
+        ) {
           onClose();
         }
       }}
@@ -281,7 +329,6 @@ export default function HabitFormModal({
               <legend className="text-sm font-medium">
                 Repeat on *
               </legend>
-
               <div className="mt-2 flex flex-wrap gap-2">
                 {DAYS.map((day) => {
                   const selected = selectedDays.includes(day.value);
@@ -365,6 +412,26 @@ export default function HabitFormModal({
 
             <div>
               <label
+                htmlFor="habit-end-date"
+                className="text-sm font-medium"
+              >
+                End date
+              </label>
+              <input
+                id="habit-end-date"
+                type="date"
+                min={startDate}
+                value={endDate}
+                onChange={(event) => setEndDate(event.target.value)}
+                className={inputClass}
+              />
+              <p className="mt-1 text-xs text-[#858580]">
+                Leave blank for no end date.
+              </p>
+            </div>
+
+            <div>
+              <label
                 htmlFor="habit-color"
                 className="text-sm font-medium"
               >
@@ -379,6 +446,49 @@ export default function HabitFormModal({
               />
             </div>
           </div>
+
+          <section className="rounded-lg border border-[#e7e7e2] p-4">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={reminderEnabled}
+                onChange={(event) =>
+                  setReminderEnabled(event.target.checked)
+                }
+                className="h-4 w-4 accent-[#fa3600]"
+              />
+
+              <span>
+                <span className="block text-sm font-medium">
+                  Enable reminder
+                </span>
+                <span className="mt-1 block text-xs text-[#72726f]">
+                  Save a preferred reminder time for this habit.
+                </span>
+              </span>
+            </label>
+
+            {reminderEnabled && (
+              <div className="mt-4">
+                <label
+                  htmlFor="habit-reminder-time"
+                  className="text-sm font-medium"
+                >
+                  Reminder time *
+                </label>
+                <input
+                  id="habit-reminder-time"
+                  type="time"
+                  required
+                  value={reminderTime}
+                  onChange={(event) =>
+                    setReminderTime(event.target.value)
+                  }
+                  className={inputClass}
+                />
+              </div>
+            )}
+          </section>
 
           <div className="flex flex-col-reverse gap-2 border-t border-[#ededE8] pt-5 sm:flex-row sm:justify-end">
             <button

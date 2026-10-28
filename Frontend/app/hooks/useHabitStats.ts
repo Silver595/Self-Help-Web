@@ -6,8 +6,19 @@ import {
   type HabitStats,
 } from '~/lib/habits';
 
+export type HabitStatsRange = 7 | 30 | 90;
+
+function toDateString(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
 export function useHabitStats(habitId: string) {
   const [stats, setStats] = useState<HabitStats | null>(null);
+  const [range, setRange] = useState<HabitStatsRange>(30);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -19,8 +30,16 @@ export function useHabitStats(habitId: string) {
       setError('');
       setStats(null);
 
+      const to = new Date();
+      const from = new Date(to);
+      from.setDate(from.getDate() - (range - 1));
+
       try {
-        const result = await getHabitStats(habitId);
+        const result = await getHabitStats(
+          habitId,
+          toDateString(from),
+          toDateString(to),
+        );
 
         if (isActive) {
           setStats(result);
@@ -45,10 +64,12 @@ export function useHabitStats(habitId: string) {
     return () => {
       isActive = false;
     };
-  }, [habitId]);
+  }, [habitId, range]);
 
   return {
     stats,
+    range,
+    setRange,
     isLoading,
     error,
   };

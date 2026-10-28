@@ -1,15 +1,19 @@
+
 import {
   Archive,
   Check,
   Flame,
   History,
   LoaderCircle,
+  Minus,
   Pencil,
+  Plus,
   RotateCcw,
   Trash2,
 } from 'lucide-react';
 
 import type { Habit, TodayHabit } from '~/lib/habits';
+import type { ProgressChange } from '~/hooks/useHabits';
 
 interface HabitRowProps {
   habit: Habit;
@@ -19,6 +23,7 @@ interface HabitRowProps {
   onEdit: (habit: Habit) => void;
   onViewHistory: (habit: Habit) => void;
   onProgress: (item: TodayHabit) => void;
+  onAdjustProgress: (item: TodayHabit, change: ProgressChange) => void;
   onManage: (
     habit: Habit,
     action: 'archive' | 'restore' | 'delete',
@@ -34,15 +39,7 @@ const secondaryButtonClass =
 const dangerButtonClass =
   'inline-flex items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2.5 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-50';
 
-const DAYS = [
-  'Sun',
-  'Mon',
-  'Tue',
-  'Wed',
-  'Thu',
-  'Fri',
-  'Sat',
-];
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function getScheduleLabel(habit: Habit) {
   if (habit.schedule.type === 'daily') return 'Every day';
@@ -62,6 +59,7 @@ export default function HabitRow({
   onEdit,
   onViewHistory,
   onProgress,
+  onAdjustProgress,
   onManage,
 }: HabitRowProps) {
   const isDueToday = Boolean(todayRecord) && !showArchived;
@@ -71,16 +69,12 @@ export default function HabitRow({
     ? Math.min(
         100,
         Math.round(
-          (todayRecord.value /
-            Math.max(todayRecord.target, 1)) *
-            100,
+          (todayRecord.value / Math.max(todayRecord.target, 1)) * 100,
         ),
       )
     : 0;
 
-  function handleManage(
-    action: 'archive' | 'restore' | 'delete',
-  ) {
+  function handleManage(action: 'archive' | 'restore' | 'delete') {
     const messages = {
       archive: `Archive "${habit.title}"?`,
       restore: `Restore "${habit.title}"?`,
@@ -107,12 +101,10 @@ export default function HabitRow({
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="break-words font-semibold">
-              {habit.title}
-            </h3>
+            <h3 className="break-words font-semibold">{habit.title}</h3>
 
             {isCompleted && (
-              <span className="rounded-full bg-orange-50-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#fa3600]">
+              <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-700">
                 Completed
               </span>
             )}
@@ -126,7 +118,6 @@ export default function HabitRow({
 
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#72726f]">
             <span>{getScheduleLabel(habit)}</span>
-
             <span>
               Target: {habit.target.count} {habit.target.unit}
             </span>
@@ -246,26 +237,66 @@ export default function HabitRow({
             </button>
 
             {isDueToday && todayRecord ? (
-              <button
-                type="button"
-                disabled={isUpdating}
-                onClick={() => onProgress(todayRecord)}
-                className={
-                  isCompleted
-                    ? secondaryButtonClass
-                    : primaryButtonClass
-                }
-              >
-                {isUpdating ? (
-                  <LoaderCircle size={16} className="animate-spin" />
-                ) : (
-                  <Check size={16} />
-                )}
+              todayRecord.target > 1 ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-label={`Decrease ${habit.title} progress`}
+                    disabled={isUpdating || todayRecord.value <= 0}
+                    onClick={() =>
+                      onAdjustProgress(todayRecord, -1)
+                    }
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#d8d8d3] bg-white hover:bg-[#f6f6f3] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {isUpdating ? (
+                      <LoaderCircle size={16} className="animate-spin" />
+                    ) : (
+                      <Minus size={16} />
+                    )}
+                  </button>
 
-                {isCompleted
-                  ? 'Undo completion'
-                  : 'Mark complete'}
-              </button>
+                  <button
+                    type="button"
+                    aria-label={`Add one ${habit.target.unit} to ${habit.title}`}
+                    disabled={isUpdating || todayRecord.completed}
+                    onClick={() =>
+                      onAdjustProgress(todayRecord, 1)
+                    }
+                    className={
+                      todayRecord.completed
+                        ? secondaryButtonClass
+                        : primaryButtonClass
+                    }
+                  >
+                    {isUpdating ? (
+                      <LoaderCircle size={16} className="animate-spin" />
+                    ) : todayRecord.completed ? (
+                      <Check size={16} />
+                    ) : (
+                      <Plus size={16} />
+                    )}
+                    {todayRecord.completed ? 'Goal reached' : '+1'}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  disabled={isUpdating}
+                  onClick={() => onProgress(todayRecord)}
+                  className={
+                    isCompleted
+                      ? secondaryButtonClass
+                      : primaryButtonClass
+                  }
+                >
+                  {isUpdating ? (
+                    <LoaderCircle size={16} className="animate-spin" />
+                  ) : (
+                    <Check size={16} />
+                  )}
+                  {isCompleted ? 'Undo completion' : 'Mark complete'}
+                </button>
+              )
             ) : (
               <span className="inline-flex rounded-lg bg-[#f4f4f1] px-3 py-2.5 text-xs text-[#72726f]">
                 Rest day
