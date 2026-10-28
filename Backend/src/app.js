@@ -8,6 +8,7 @@ import { ApiError } from './utils/ApiError.js';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { apiLimiter } from './middlewares/rateLimit.middleware.js';
+import  notificationRouter  from './routes/notification.routes.js'
 
 const app = express();
 app.set('trust proxy', 1);
@@ -79,7 +80,7 @@ app.use('/api/v1/resources', resourceRouter);
 import habitRouter from './routes/habit.routes.js';
 
 app.use('/api/v1/habits', habitRouter);
-
+app.use('/api/v1/notifications', notificationRouter);
 import noteRouter from './routes/note.routes.js';
 
 app.use('/api/v1/notes', noteRouter);
