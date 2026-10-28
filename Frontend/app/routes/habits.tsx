@@ -10,6 +10,7 @@ import HabitList from '~/components/features/habits/HabitList';
 
 import { useHabits } from '~/hooks/useHabits';
 import type { Habit } from '~/lib/habits';
+import ReminderSettings from '~/components/features/habits/ReminderSettings';
 
 const primaryButtonClass =
   'inline-flex items-center justify-center gap-2 rounded-lg bg-[#fa3600] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#d92f00] disabled:opacity-50';
@@ -194,7 +195,8 @@ export default function HabitsPage() {
             </button>
           </div>
         </div>
-      )}
+    )}
+      <ReminderSettings />
 
       {!showArchived && (
         <HabitOverview
