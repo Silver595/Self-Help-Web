@@ -55,6 +55,20 @@ jobs:
           const pub = process.env.VAPID_PUBLIC_KEY ?? "";
           const priv = process.env.VAPID_PRIVATE_KEY ?? "";
 
+          if (!pub && !priv) {
+            console.log(
+              "::warning::VAPID secrets are not configured; skipping key validation."
+            );
+            process.exit(0);
+          }
+
+          if (!pub || !priv) {
+            console.error(
+              "VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY must be configured together."
+            );
+            process.exit(1);
+          }
+
           const validFormat = key => /^[A-Za-z0-9_-]+$/.test(key);
           const decode = key =>
             Buffer.from(
